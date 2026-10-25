@@ -1,0 +1,504 @@
+/* S.OMORI portfolio LP — design tokens & base styles
+   Spacing and type scales follow the golden ratio (φ ≈ 1.618).
+   Space:  8 → 13 → 21 → 34 → 55 → 89 px
+   Type:   16 → 26 → 42 → 68 px (base 16, step φ) */
+
+:root {
+  --color-night: #0a0a0c;
+  --color-deep-blue: #0f172a;
+  --color-gold: #d97706;
+  --color-cream: #f5f1e8;
+  --color-muted: #a8a29e;
+
+  --phi: 1.618;
+  --space-1: 8px;
+  --space-2: 13px;
+  --space-3: 21px;
+  --space-4: 34px;
+  --space-5: 55px;
+  --space-6: 89px;
+
+  --text-base: 16px;
+  --text-lg: 26px;
+  --text-xl: 42px;
+  --text-2xl: 68px;
+
+  --font-serif: "Playfair Display", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-sans: "Inter", "Hiragino Sans", "Noto Sans JP", sans-serif;
+
+  --gutter: 16px;
+  --max-width: 1040px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--color-night);
+  color: var(--color-cream);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--phi);
+  overflow-x: hidden;
+}
+
+img,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Header */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 10;
+  background: linear-gradient(to bottom, rgba(10, 10, 12, 0.9), transparent);
+}
+
+.site-header .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: var(--space-2);
+}
+
+.brand {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.cta-link {
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-gold);
+  border-bottom: 1px solid var(--color-gold);
+  padding-bottom: 2px;
+}
+
+/* Hero */
+.hero {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 70% 30%, rgba(15, 23, 42, 0.9), transparent 60%),
+    var(--color-night);
+}
+
+.hero .container {
+  padding-top: var(--space-6);
+}
+
+/* Hero layout: copy and reel split on the golden ratio (1.618 : 1) */
+.hero-grid {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .hero-grid {
+    grid-template-columns: 1.618fr 1fr;
+    gap: var(--space-5);
+  }
+}
+
+/* Film reel: 3D canvas on wide screens, CSS fallback elsewhere */
+.reel {
+  position: relative;
+  width: min(100%, 260px);
+  aspect-ratio: 1 / 1;
+  margin-inline: auto;
+}
+
+.reel canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.reel-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--color-night) 0 14%, transparent 15%),
+    repeating-conic-gradient(from 0deg, #1e293b 0 6deg, #0f172a 6deg 30deg);
+  border: 2px solid var(--color-gold);
+  box-shadow: 0 0 0 var(--space-1) var(--color-night);
+  animation: reel-spin 40s linear infinite;
+}
+
+.reel.is-3d .reel-fallback {
+  display: none;
+}
+
+@keyframes reel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.eyebrow {
+  font-size: 13px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.hero h1 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(42px, 9vw, var(--text-2xl));
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-4);
+  max-width: 13em;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--color-gold);
+}
+
+.lead {
+  max-width: 26em;
+  color: var(--color-muted);
+  margin: 0 0 var(--space-5);
+}
+
+/* Buttons */
+.button {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold);
+  text-decoration: none;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 14px;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  background: var(--color-gold);
+  color: var(--color-night);
+  outline: none;
+}
+
+/* Sections */
+.section {
+  padding-block: var(--space-6);
+  border-top: 1px solid rgba(245, 241, 232, 0.08);
+}
+
+.section.is-deep {
+  background: var(--color-deep-blue);
+}
+
+.section h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(26px, 5vw, var(--text-xl));
+  line-height: 1.2;
+  margin: 0 0 var(--space-5);
+}
+
+/* Philosophy: three principles in a golden-ratio split */
+.principles {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: 1fr;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.principles li {
+  padding-top: var(--space-3);
+  border-top: 1px solid rgba(217, 119, 6, 0.4);
+}
+
+.principles h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-2);
+}
+
+.principles p {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+/* Works: placeholder cards until real footage is provided */
+.works {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.work {
+  --rx: 0deg;
+  --ry: 0deg;
+  position: relative;
+  aspect-ratio: 1.618 / 1;
+  background: linear-gradient(135deg, #1e293b, var(--color-night));
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-3);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease, border-color 0.4s ease;
+}
+
+.work[data-tilt] {
+  transform: perspective(889px) rotateX(var(--rx)) rotateY(var(--ry));
+}
+
+.work[data-tilt]:hover {
+  border-color: var(--color-gold);
+  transition: transform 0.15s ease-out, border-color 0.4s ease;
+}
+
+/* Video slot: fills the card once a reel is provided (poster + muted loop) */
+.work-media {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(15, 23, 42, 0.9), transparent 70%);
+}
+
+.work-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.work-title {
+  position: relative;
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  transform: translateZ(34px);
+}
+
+.contact-address {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  color: var(--color-cream);
+  overflow-wrap: anywhere;
+}
+
+/* Profile */
+.profile-img {
+  width: min(100%, 260px);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border: 1px solid rgba(217, 119, 6, 0.4);
+  margin: 0 0 var(--space-4);
+}
+
+.profile-name {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  margin: 0 0 var(--space-2);
+}
+
+.profile-body {
+  max-width: 26em;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.profile-sub {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  color: var(--color-muted);
+  margin-left: var(--space-2);
+}
+
+.stats {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+  margin: var(--space-4) 0 0;
+}
+
+.stats dt {
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--color-muted);
+}
+
+.stats dd {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  color: var(--color-gold);
+}
+
+.stats dd span {
+  font-size: var(--text-lg);
+  color: var(--color-cream);
+  margin-left: 6px;
+}
+
+.stats .stats-text {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-cream);
+}
+
+@media (min-width: 768px) {
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Pricing: three tiers, middle tier widest */
+.prices {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-4);
+}
+
+.prices li {
+  padding: var(--space-4);
+  border: 1px solid rgba(245, 241, 232, 0.12);
+}
+
+.prices h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-2);
+}
+
+.prices .price {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  white-space: nowrap;
+  color: var(--color-gold);
+  margin: 0 0 var(--space-2);
+}
+
+.prices .price span {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-cream);
+  margin-left: 6px;
+}
+
+.prices p {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.note {
+  color: var(--color-muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .prices {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.work-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Work card meta line */
+.work-meta {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--color-muted);
+}
+
+/* Contact */
+.contact p {
+  max-width: 26em;
+  color: var(--color-muted);
+  margin: 0 0 var(--space-4);
+}
+
+.footer {
+  padding-block: var(--space-3);
+  font-size: 13px;
+  color: var(--color-muted);
+  text-align: center;
+  border-top: 1px solid rgba(245, 241, 232, 0.08);
+}
+
+/* Wider screens: golden-ratio columns (≈ 0.618 : 1) */
+@media (min-width: 768px) {
+  .principles {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .works {
+    grid-template-columns: 1.618fr 1fr;
+  }
+
+  .works .work:first-child {
+    grid-row: span 2;
+  }
+}
+
+/* Motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

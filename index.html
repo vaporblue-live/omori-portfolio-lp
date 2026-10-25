@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>S.OMORI — 動画編集ポートフォリオ</title>
+  <meta name="description" content="シネマティックな動画編集。リズムと緩急で映像の世界観を伝える、S.OMORIのポートフォリオ。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="reel.js" defer></script>
+  <script type="module" src="tilt.js" defer></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="#top">S.OMORI</a>
+      <a class="cta-link" href="#contact">Contact</a>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Video Editor — Portfolio</p>
+          <h1 id="hero-title">Edit the <em>rhythm</em>,<br>not just the cut.</h1>
+          <p class="lead">
+            ジャズのフレーズのように、間と緩急で観る人の感情を動かす映像編集。
+            ブランドムービーからウェディングまで、世界観を丁寧に形にします。
+          </p>
+          <a class="button" href="#contact">案件を相談する</a>
+        </div>
+        <div class="reel" id="reel" aria-hidden="true">
+          <div class="reel-fallback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section is-deep" aria-labelledby="philosophy-title">
+      <div class="container">
+        <h2 id="philosophy-title">Editing Philosophy</h2>
+        <ul class="principles">
+          <li>
+            <h3>Rhythm</h3>
+            <p>カットの長さを音楽の拍として捉え、映像のテンポを設計します。</p>
+          </li>
+          <li>
+            <h3>Tension</h3>
+            <p>余白と静寂で緊張を生み、必要な瞬間にだけ解き放ちます。</p>
+          </li>
+          <li>
+            <h3>Tone</h3>
+            <p>色と質感を揃え、作品ごとに一貫した世界観を保ちます。</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="works-title">
+      <div class="container">
+        <h2 id="works-title">Selected Works</h2>
+        <ul class="works">
+          <li class="work" data-tilt>
+            <div class="work-media" data-video-slot aria-hidden="true">
+              <img src="images/work-contact.webp" alt="" width="1254" height="1254">
+            </div>
+            <span class="work-title">はじまりの一杯</span>
+            <span class="work-meta">CM STYLE · 27.7 SEC · 絵コンテから13コマで構成</span>
+          </li>
+          <li class="work" data-tilt>
+            <div class="work-media" data-video-slot aria-hidden="true"></div>
+            <span class="work-title">Fuu</span>
+            <span class="work-meta">MUSIC CHANNEL · 楽曲ごとのサムネイルと映像</span>
+          </li>
+        </ul>
+        <a class="button" href="https://www.youtube.com/watch?v=XSqKaXFOzk4" target="_blank" rel="noopener">「はじまりの一杯」をYouTubeで見る</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="price-title">
+      <div class="container">
+        <h2 id="price-title">Pricing</h2>
+        <ul class="prices">
+          <li>
+            <h3>ショート動画</h3>
+            <p class="price">3,000〜8,000円<span>／1本</span></p>
+            <p>60秒まで。カット・テロップ・BGM・効果音</p>
+          </li>
+          <li>
+            <h3>YouTube動画</h3>
+            <p class="price">5,000〜20,000円<span>／1本</span></p>
+            <p>10分前後。構成の整理・テンポ調整・テロップ・音量</p>
+          </li>
+          <li>
+            <h3>広告風・予告編風</h3>
+            <p class="price">お見積り</p>
+            <p>企画・絵コンテから。商品や店舗の魅力を短く強く伝えます</p>
+          </li>
+        </ul>
+        <p class="note">納期・連絡方法は着手前に確認して合意します。</p>
+      </div>
+    </section>
+
+    <section class="section is-deep" aria-labelledby="profile-title">
+      <div class="container profile">
+        <h2 id="profile-title">Profile</h2>
+        <img class="profile-img" src="images/profile.webp" alt="大森慎太郎の肖像イラスト" width="1254" height="1254">
+        <p class="profile-name">大森 慎太郎 <span class="profile-sub">S.OMORI / SAITAMA, JP</span></p>
+        <p class="profile-body">映画宣伝と番組制作の現場で10年。予告編で培った構成とテンポで、YouTube・SNS・広告の動画を編集します。</p>
+        <dl class="stats">
+          <div><dt>経験</dt><dd>10<span>年</span></dd></div>
+          <div><dt>自分のチャンネルで公開</dt><dd>89<span>本</span></dd></div>
+          <div><dt>使用ソフト</dt><dd class="stats-text">Premiere Pro / After Effects / Photoshop / Firefly</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="section is-deep contact" id="contact" aria-labelledby="contact-title">
+      <div class="container">
+        <h2 id="contact-title">Start a Project</h2>
+        <p>企画の段階からご相談ください。ご予算と目的に合わせて、最適な構成をご提案します。</p>
+        <a class="button" href="mailto:shintaroomori78@gmail.com">メールで相談する</a>
+        <p class="contact-address">shintaroomori78@gmail.com</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">© S.OMORI</div>
+  </footer>
+
+</body>
+</html>

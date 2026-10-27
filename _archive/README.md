@@ -5,8 +5,8 @@ owner's portfolio. Nothing here is served by the live site.
 
 ## How to restore
 
-- Whole site as published: `git checkout archive/award-stage-v1-site`
-  (tag on the commit that was live), or merge branch `redesign-award-stage`.
+- Whole site as published: `git checkout archive/award-stage-v1-live`
+  (branch pinned to the commit that was live), or merge `redesign-award-stage`.
 - This branch adds the working materials under `_archive/`.
 
 ## Contents

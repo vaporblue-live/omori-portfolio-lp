@@ -1,0 +1,473 @@
+/* S.OMORI — Drop the Needle
+   Classic: Blue Note sleeve, vinyl, tonearm. Advanced: Web Audio drives the motion.
+   Letter colours are the portfolio video's own. Spacing on the golden ratio:
+   8 · 13 · 21 · 34 · 55 · 89 · 144 px */
+
+:root {
+  --navy: #0a1430;
+  --stripe: rgba(31, 72, 160, 0.55);
+  --blue: #2f6fe0;
+  --white: #f5f2ea;
+  --orange: #f08a24;
+  --yellow: #f5c242;
+  --sky: #6fb0ff;
+  --gold: #e8b04a;
+  --sub: #b9c4dc;
+
+  --s1: 8px;
+  --s2: 13px;
+  --s3: 21px;
+  --s4: 34px;
+  --s5: 55px;
+  --s6: 89px;
+  --s7: 144px;
+
+  --latin: "Archivo Black", "Noto Sans JP", sans-serif;
+  --jp: "Noto Sans JP", sans-serif;
+  --mono: "DM Mono", monospace;
+
+  /* 0..1, written by needle.js from the bass of the playing track */
+  --beat: 0;
+  --size: clamp(240px, 30vw, 440px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--white);
+  font-family: var(--jp);
+  line-height: 1.618;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle, rgba(111, 176, 255, 0.16) 1px, transparent 1.6px) 0 0 / 13px 13px,
+    repeating-linear-gradient(-58deg, transparent 0 21px, var(--stripe) 21px 34px),
+    var(--navy);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.w { color: var(--white); }
+.o { color: var(--orange); }
+.y { color: var(--yellow); }
+.s { color: var(--sky); }
+
+/* ---------- Header ---------- */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+  padding: var(--s3) var(--s5);
+}
+
+.logo {
+  margin-right: auto;
+  font-family: var(--latin);
+  font-size: 21px;
+  letter-spacing: 0.04em;
+  color: var(--white);
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  gap: var(--s4);
+}
+
+.nav a {
+  font-family: var(--latin);
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  color: var(--sub);
+  text-decoration: none;
+  padding: var(--s2) 0;
+}
+
+.nav a:hover,
+.nav a:focus-visible {
+  color: var(--orange);
+}
+
+/* Sound switch: always visible, off until the needle drops */
+.sound {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  min-height: 44px;
+  padding: 0 var(--s3);
+  border: 1px solid rgba(245, 242, 234, 0.35);
+  border-radius: 999px;
+  background: rgba(10, 20, 48, 0.6);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+}
+
+.sound[aria-pressed="true"] {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.sound-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 13px;
+}
+
+.sound-bars i {
+  width: 3px;
+  height: 3px;
+  background: currentColor;
+  transition: height 0.08s linear;
+}
+
+.sound[aria-pressed="true"] .sound-bars i:nth-child(1) { height: calc(3px + var(--beat) * 10px); }
+.sound[aria-pressed="true"] .sound-bars i:nth-child(2) { height: calc(5px + var(--beat) * 8px); }
+.sound[aria-pressed="true"] .sound-bars i:nth-child(3) { height: calc(3px + var(--beat) * 9px); }
+.sound[aria-pressed="true"] .sound-bars i:nth-child(4) { height: calc(4px + var(--beat) * 6px); }
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: var(--s5);
+  padding: var(--s7) var(--s5) var(--s6);
+  /* the resting tonearm and the record's shadow reach past the deck */
+  overflow-x: clip;
+}
+
+/* Title: Blue Note-sized letters, each dropped in and playable like a key */
+.title {
+  margin: 0;
+  font-family: var(--latin);
+  font-weight: 400;
+  font-size: clamp(72px, 12.4vw, 178px);
+  line-height: 0.86;
+  letter-spacing: -0.02em;
+}
+
+.row {
+  display: block;
+  white-space: nowrap;
+}
+
+.ch {
+  display: inline-block;
+  transform: translateY(calc(var(--beat) * -4px));
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* backwards only: once landed, the letter is free for hover and beat motion */
+  animation: drop-in 0.9s cubic-bezier(0.34, 1.4, 0.64, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms + 200ms);
+}
+
+.ch:hover {
+  transform: translateY(0.08em);
+  transition-duration: 0.12s;
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.6em) rotate(-4deg);
+  }
+}
+
+.catalog {
+  margin: var(--s4) 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+}
+
+.tagline {
+  margin: var(--s2) 0 0;
+  font-weight: 900;
+  font-size: clamp(21px, 2.4vw, 34px);
+  line-height: 1.45;
+}
+
+/* break lines only between phrases, never inside a word */
+.phrase {
+  display: inline-block;
+}
+
+/* ---------- Deck: sleeve, record, tonearm ---------- */
+.deck {
+  position: relative;
+  justify-self: center;
+  width: calc(var(--size) * 1.618);
+  height: var(--size);
+}
+
+.sleeve {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: var(--size);
+  height: var(--size);
+  overflow: hidden;
+  background: #1f58cf;
+  box-shadow: 0 var(--s3) var(--s5) rgba(0, 0, 0, 0.6);
+  /* clicks on the sleeve reach the record tucked behind it */
+  pointer-events: none;
+}
+
+.sleeve img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sleeve-name {
+  position: absolute;
+  left: 8%;
+  top: 6%;
+  font-family: var(--latin);
+  font-size: calc(var(--size) * 0.077);
+}
+
+.sleeve-cat {
+  position: absolute;
+  left: 8%;
+  bottom: 6%;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--navy);
+}
+
+.record {
+  position: absolute;
+  left: calc(var(--size) * 0.5);
+  top: 0;
+  z-index: 1;
+  width: var(--size);
+  height: var(--size);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.record:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 6px;
+}
+
+.is-playing .record {
+  transform: translateX(calc(var(--size) * 0.12));
+}
+
+.vinyl {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle, #151515 0 2px, #1d1d1d 2px 4px),
+    #121212;
+  box-shadow: inset 0 0 0 2px #000, 0 var(--s4) var(--s5) rgba(0, 0, 0, 0.6);
+}
+
+/* light catching the grooves; it brightens on the beat */
+.grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 30deg,
+    transparent 0 40deg, rgba(255, 255, 255, 0.14) 55deg, transparent 75deg 210deg,
+    rgba(255, 255, 255, 0.1) 230deg, transparent 250deg);
+  opacity: calc(0.7 + var(--beat) * 0.6);
+}
+
+.label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34%;
+  height: 34%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0a0a0a 0 6%, var(--orange) 7%);
+  font-family: var(--latin);
+  font-size: calc(var(--size) * 0.03);
+  line-height: 1.3;
+  color: #10131c;
+  transform: translate(-50%, -50%) scale(calc(1 + var(--beat) * 0.04));
+}
+
+.is-playing .vinyl {
+  animation: spin 1.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Tonearm: rests off the record, swings onto the grooves when playing */
+.tonearm {
+  position: absolute;
+  left: calc(var(--size) * 1.52);
+  top: calc(var(--size) * -0.06);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.pivot {
+  position: absolute;
+  left: calc(var(--size) * -0.07);
+  top: calc(var(--size) * -0.07);
+  width: calc(var(--size) * 0.14);
+  height: calc(var(--size) * 0.14);
+  border-radius: 50%;
+  background: radial-gradient(circle, #e6ebf5 0 30%, #5d6577 31% 100%);
+  box-shadow: 0 var(--s1) var(--s3) rgba(0, 0, 0, 0.5);
+}
+
+.arm {
+  position: absolute;
+  left: calc(var(--size) * -0.018);
+  top: 0;
+  width: calc(var(--size) * 0.036);
+  height: calc(var(--size) * 0.8);
+  border-radius: var(--s1);
+  background: linear-gradient(90deg, #9aa3b5, #e6ebf5, #8a93a5);
+  box-shadow: 0 var(--s1) var(--s3) rgba(0, 0, 0, 0.5);
+  transform-origin: 50% 0;
+  transform: rotate(-10deg);
+  transition: transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.head {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--size) * -0.03);
+  width: calc(var(--size) * 0.07);
+  height: calc(var(--size) * 0.1);
+  border-radius: 4px;
+  background: linear-gradient(#c9cfdb, #6b7385);
+  transform: translateX(-50%);
+}
+
+.is-playing .arm {
+  transform: rotate(18deg);
+}
+
+/* ---------- Cue ---------- */
+.cue {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--s4);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s1);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  color: var(--sub);
+}
+
+.cue-line {
+  width: 1px;
+  height: var(--s5);
+  background: linear-gradient(var(--gold), transparent);
+  animation: cue 2.6s ease-in-out infinite;
+  transform-origin: top;
+}
+
+@keyframes cue {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.5; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+
+.placeholder {
+  min-height: 61.8vh;
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 767px) {
+  :root {
+    --size: min(56vw, 260px);
+  }
+
+  .site-header {
+    padding: var(--s2) var(--s3);
+    gap: var(--s2);
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+    gap: var(--s5);
+    padding: var(--s6) var(--s3) var(--s7);
+    align-content: center;
+  }
+
+  .deck {
+    justify-self: start;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .ch,
+  .cue-line,
+  .is-playing .vinyl {
+    animation: none;
+  }
+
+  .ch,
+  .label,
+  .arm,
+  .record {
+    transition: none;
+  }
+
+  :root {
+    --beat: 0 !important;
+  }
+}

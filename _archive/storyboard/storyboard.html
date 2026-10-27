@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>S.OMORI Storyboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --night: #0a0a0c;
+  --blue: #1f4ea8;
+  --blue-deep: #12306b;
+  --cream: #f5f1e8;
+  --muted: #9aa3b5;
+  --gold: #c9a24a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #222; font-family: "Shippori Mincho B1", serif; color: var(--cream); }
+/* Award-night stage: velvet curtains, searchlights, gold bokeh and glitter, glossy floor */
+.frame {
+  position: relative; width: 1440px; height: 900px; overflow: hidden; margin: 0 0 40px;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 108%, rgba(201,162,74,.45), transparent 70%),
+    linear-gradient(to bottom, transparent 72%, rgba(201,162,74,.10) 73%, rgba(10,10,20,.9) 100%),
+    repeating-linear-gradient(90deg, rgba(8,20,55,.95) 0 21px, rgba(31,78,168,.55) 34px, rgba(8,20,55,.95) 55px),
+    #050814;
+}
+/* center stage glow that sits over the curtain folds */
+.frame > .stagebg {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 38% 70% at 50% 40%, rgba(10,14,40,.2), rgba(5,8,20,.92) 80%),
+    radial-gradient(ellipse 26% 50% at 50% 30%, rgba(90,140,255,.28), transparent 70%);
+}
+/* searchlight beams */
+.frame::after {
+  content: ""; position: absolute; inset: -20% -10% 0; pointer-events: none; mix-blend-mode: screen;
+  background:
+    conic-gradient(from 160deg at 18% -5%, transparent 0deg, rgba(255,226,150,.38) 7deg, transparent 15deg),
+    conic-gradient(from 184deg at 82% -5%, transparent 0deg, rgba(255,226,150,.38) 7deg, transparent 15deg),
+    conic-gradient(from 172deg at 40% -8%, transparent 0deg, rgba(150,190,255,.26) 5deg, transparent 10deg),
+    conic-gradient(from 190deg at 62% -8%, transparent 0deg, rgba(150,190,255,.26) 5deg, transparent 10deg);
+  filter: blur(4px);
+}
+/* random bokeh and sparkles are drawn on a canvas per frame (see script) */
+.sparkle { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+/* spotlight */
+.spot { position: absolute; inset: 0; z-index: 1; background: radial-gradient(ellipse 30% 50% at 62% 45%, rgba(255,226,150,.16), transparent 70%); }
+.label { position: absolute; top: 21px; right: 34px; font-size: 13px; letter-spacing: .3em; color: var(--muted); z-index: 5; }
+.menu { position: absolute; left: 55px; top: 50%; transform: translateY(-50%); z-index: 5; display: grid; gap: 13px; }
+.menu span { font-size: 13px; font-weight: 300; letter-spacing: .32em; color: var(--muted); }
+.menu span.on { color: var(--gold); font-weight: 700; }
+.menu span.on::before { content: "→ "; }
+.logo { position: absolute; left: 55px; top: 34px; font-weight: 800; font-size: 21px; letter-spacing: .12em; z-index: 7; color: #fff; text-shadow: 0 0 13px rgba(255,255,255,.35); }
+canvas.gl { position: absolute; inset: 0; z-index: 3; }
+.progress { position: absolute; right: 34px; top: 50%; transform: translateY(-50%); display: grid; gap: 8px; z-index: 5; }
+.progress i { display: block; width: 2px; height: 34px; background: rgba(245,241,232,.2); }
+.progress i.on { background: var(--gold); }
+/* 3D stage */
+.stage { position: absolute; inset: 0; z-index: 2; perspective: 1400px; perspective-origin: 62% 45%; }
+/* Thick 3D glass panel: tinted body, bevelled rim, inner glow, glossy sheen, rear plate for depth */
+.card {
+  position: absolute; border-radius: 21px; transform-style: preserve-3d;
+  border: 1px solid rgba(255,255,255,.45);
+  background:
+    linear-gradient(160deg, rgba(255,255,255,.26) 0%, rgba(255,255,255,.06) 34%, rgba(255,255,255,0) 55%),
+    linear-gradient(135deg, rgba(70,120,230,.38), rgba(15,30,80,.55) 62%, rgba(5,10,30,.7));
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.75),
+    inset 2px 0 0 rgba(255,255,255,.25),
+    inset 0 -3px 8px rgba(120,160,255,.25),
+    inset 0 0 55px rgba(110,160,255,.28),
+    0 0 0 1px rgba(10,20,50,.6),
+    /* stacked edge slabs give the glass its thickness */
+    2px 3px 0 rgba(120,160,255,.45),
+    4px 6px 0 rgba(60,100,200,.4),
+    6px 9px 0 rgba(30,60,140,.35),
+    8px 12px 0 rgba(15,30,80,.3),
+    0 34px 89px rgba(0,0,0,.7),
+    0 0 89px rgba(60,110,230,.35);
+  display: flex; flex-direction: column; justify-content: flex-end; padding: 21px;
+}
+/* glossy diagonal light streak */
+.card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(255,255,255,.22), transparent 70%),
+    linear-gradient(118deg, transparent 18%, rgba(255,255,255,.07) 32%, rgba(255,255,255,.12) 40%, rgba(255,255,255,.04) 52%, transparent 66%);
+}
+.card > * { position: relative; z-index: 1; }
+/* Designed type: gold foil with bevel and glow, wide tracking (not plain set text) */
+.foil, .card .t {
+  font-weight: 800; letter-spacing: .12em;
+  background: linear-gradient(180deg, #fff6d2 0%, #f0d27a 30%, #a8792a 50%, #f7dc90 64%, #c99a3c 82%, #7a561a 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(255,250,230,.55)) drop-shadow(0 3px 2px rgba(0,0,0,.7)) drop-shadow(0 0 21px rgba(255,200,100,.35));
+}
+.card .t { font-size: 34px; }
+/* small caps label with hairlines either side, like a title card */
+.kicker { display: inline-flex; align-items: center; gap: 13px; font-size: 12px; letter-spacing: .5em; color: #e8d6a8; }
+.kicker::before, .kicker::after { content: ""; width: 34px; height: 1px; background: linear-gradient(90deg, transparent, #c9a24a, transparent); }
+/* Curtain: strips are generated by the script */
+.curtain { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.curtain .strip { position: absolute; top: 21px; bottom: 0; transform-origin: top center;
+  background: linear-gradient(90deg, #071a4d 0%, #2a5cc6 38%, #4f80e0 50%, #1d47a8 64%, #071a4d 100%);
+  box-shadow: inset 0 -34px 34px rgba(0,0,0,.45); }
+.curtain .strip::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 13px; background: linear-gradient(#e8c46a, #8a6220); }
+/* straight velvet valance with a gold braid and tassel fringe */
+.valance { position: absolute; left: 0; right: 0; top: 0; height: 55px; z-index: 4;
+  background:
+    linear-gradient(to bottom, rgba(255,255,255,.08), transparent 40%, rgba(0,0,0,.35)),
+    repeating-linear-gradient(90deg, #0e2a6e 0 21px, #2f62c9 34px, #0e2a6e 55px);
+  box-shadow: 0 13px 21px rgba(0,0,0,.6); }
+.fringe { position: absolute; left: 0; right: 0; top: 55px; height: 21px; z-index: 4;
+  background:
+    linear-gradient(#f7dc90, #a8792a) top / 100% 5px no-repeat,
+    repeating-linear-gradient(90deg, #e8c46a 0 2px, transparent 2px 8px) 0 5px / 100% 16px no-repeat;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,.6)); }
+.footlights { position: absolute; left: 0; right: 0; bottom: 0; height: 144px; z-index: 4; pointer-events: none;
+  background: radial-gradient(ellipse 50% 100% at 50% 100%, rgba(255,214,120,.35), transparent 70%); }
+/* Helix of glass cards */
+.helix { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; transform: translateZ(-300px) rotateX(-8deg); }
+.helix .card { left: -170px; top: -105px; width: 340px; height: 210px; }
+.card .s { font-size: 12px; letter-spacing: .24em; color: #c8d2ea; margin-top: 8px; }
+/* front (nominee) card: gold rim and warm glow */
+.card.front {
+  border: 1px solid rgba(255,220,140,.9);
+  box-shadow:
+    inset 0 2px 0 rgba(255,240,200,.9),
+    inset 0 0 0 1px rgba(201,162,74,.6),
+    inset 0 0 55px rgba(255,214,120,.22),
+    2px 3px 0 rgba(255,225,150,.6),
+    4px 6px 0 rgba(200,160,80,.45),
+    6px 9px 0 rgba(140,105,45,.38),
+    8px 12px 0 rgba(80,60,25,.3),
+    0 34px 89px rgba(0,0,0,.7),
+    0 0 89px rgba(255,200,100,.35);
+}
+.badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .3em; color: var(--night); background: var(--gold); padding: 3px 8px; margin-bottom: 13px; align-self: flex-start; }
+.blurred { filter: blur(1.5px); opacity: .7; }
+.thumb { flex: 1; margin: -21px -21px 21px; background: repeating-linear-gradient(45deg, rgba(245,241,232,.06) 0 8px, transparent 8px 16px); display: grid; place-items: center; font-size: 12px; letter-spacing: .3em; color: var(--muted); border-bottom: 1px solid rgba(245,241,232,.15); }
+.caption { width: 1440px; padding: 13px 0 34px; color: #ddd; font-size: 15px; line-height: 1.7; }
+.caption b { color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- 0. Curtain closed -->
+<section class="frame" id="f0">
+  <canvas class="gl" data-mode="closed" width="1440" height="900"></canvas>
+  <div class="footlights"></div>
+  <div class="logo">S.OMORI</div>
+  <div style="position:absolute;left:0;right:0;top:300px;z-index:6;text-align:center;">
+    <div class="kicker" style="color:#fff;">S.OMORI PRESENTS</div>
+    <div class="foil" style="font-size:89px;line-height:1.2;margin-top:34px;letter-spacing:.18em;">あなたに<br>最高の１本を</div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:55px;z-index:6;text-align:center;color:#f5e6bd;font-size:12px;letter-spacing:.6em;text-shadow:0 0 13px rgba(255,214,120,.6);">
+    SCROLL<div style="width:1px;height:55px;margin:13px auto 0;background:linear-gradient(#e8c46a,transparent);"></div>
+  </div>
+</section>
+<div class="caption"><b>コマ0：開幕前（スクロール前）</b>　画面いっぱいに青いベルベットの幕。幕はゆっくり揺れている。中央に金箔の文字で「あなたに最高の１本を」、下に小さく「SCROLL」と細い線。足元から金の照明がにじむ。</div>
+
+<!-- 1. Curtain opening, helix flows out -->
+<section class="frame" id="f1">
+  <canvas class="gl" data-mode="open" width="1440" height="900"></canvas>
+  <div class="footlights"></div>
+  <div class="logo">S.OMORI</div>
+  <div style="position:absolute;left:0;right:0;top:110px;z-index:6;text-align:center;">
+    <div class="kicker">VIDEO EDITOR / POST-PRODUCTION</div>
+  </div>
+  <div class="progress"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+</section>
+<div class="caption"><b>コマ1：開幕（スクロール開始）</b>　スクロールに合わせて幕が左右に開く。開いた舞台の奥から、ガラスのカードが螺旋を描いて手前へ流れ出る（作品→プロフィール→料金→お問い合わせの順に回ってくる）。正面に来たカードだけ金の縁。「ノミネート作を見る」ボタンは削除。</div>
+
+<!-- 2. Works -->
+<section class="frame" id="f2">
+  <div class="stagebg"></div>
+  <div class="spot"></div>
+  <div class="logo">S.OMORI</div>
+  <div class="label">NOMINEES · SELECTED WORKS</div>
+  <div class="menu"><span class="on">WORKS</span><span>PROFILE</span><span>PRICING</span><span>CONTACT</span></div>
+  <div class="stage">
+    <div class="card blurred" style="left:420px;top:200px;width:320px;height:198px;transform:translateZ(-500px) rotateY(32deg);"><div class="t" style="font-size:21px">COMING SOON</div></div>
+    <div class="card blurred" style="left:1050px;top:160px;width:340px;height:210px;transform:translateZ(-300px) rotateY(-30deg);"><span class="badge" style="opacity:.7">NOMINEE</span><div class="t" style="font-size:26px">Fuu</div><div class="s">MUSIC CHANNEL</div></div>
+    <div class="card front" style="left:520px;top:240px;width:640px;height:396px;transform:translateZ(80px) rotateY(-8deg);">
+      <div class="thumb">作品サムネイル（はじまりの一杯）</div>
+      <span class="badge">NOMINEE</span><div class="t" style="font-size:42px">はじまりの一杯</div><div class="s">CM STYLE · 27.7 SEC · 絵コンテ13コマから構成</div>
+    </div>
+  </div>
+  <div style="position:absolute;left:520px;top:700px;z-index:5;border:1px solid var(--gold);color:var(--gold);padding:13px 34px;font-size:14px;letter-spacing:.2em;font-weight:700;">▶ YouTubeで見る</div>
+  <div class="progress"><i></i><i class="on"></i><i></i><i></i><i></i></div>
+</section>
+<div class="caption"><b>コマ2：作品（ノミネート）</b>　スクロールすると、カードが螺旋の軌道を回り、次の作品が正面へ。正面のカードだけ金の縁と「NOMINEE」。奥のカードはぼけて小さく、視差で奥行きを出す。左に細いメニュー（現在地は金色）。</div>
+
+<!-- 3. Profile -->
+<section class="frame" id="f3">
+  <div class="stagebg"></div>
+  <div class="spot"></div>
+  <div class="logo">S.OMORI</div>
+  <div class="label">PROFILE</div>
+  <div class="menu"><span>WORKS</span><span class="on">PROFILE</span><span>PRICING</span><span>CONTACT</span></div>
+  <div class="stage">
+    <div class="card front" style="left:300px;top:110px;width:980px;height:680px;transform:translateZ(0) rotateY(-4deg);justify-content:flex-start;padding:55px;background:linear-gradient(160deg, rgba(255,255,255,.2) 0%, rgba(255,255,255,.04) 30%, transparent 50%),linear-gradient(135deg, rgba(40,80,180,.6), rgba(8,18,50,.82) 60%, rgba(4,8,24,.88));">
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:55px;">
+        <div style="width:300px;height:300px;background:var(--blue);display:grid;place-items:center;color:var(--cream);font-size:13px;letter-spacing:.3em;border:1px solid var(--gold);">肖像（正方形・トリミングなし）</div>
+        <div>
+          <div style="font-size:55px;font-weight:800;letter-spacing:.14em;color:#fff;text-shadow:0 0 21px rgba(255,255,255,.35);">S.OMORI</div>
+          <div style="font-size:13px;letter-spacing:.3em;color:var(--muted);margin:8px 0 21px;">VIDEO EDITOR / POST-PRODUCTION · SAITAMA, JP</div>
+          <div style="font-size:16px;line-height:1.75;color:var(--cream);">［紹介文：映画宣伝・番組制作の経験と、ポストプロダクション（編集・カラー・音）の担当範囲を、自然な文章でまとめる］</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:34px;">
+        <div style="border-top:1px solid var(--gold);padding-top:13px;"><div style="font-weight:800;font-size:42px;color:var(--gold);">10<span style="font-size:21px;color:var(--cream)"> 年</span></div><div style="font-size:14px;line-height:1.7;color:var(--muted);">［経験の説明：何を担当し、何が身についたかを2〜3文で］</div></div>
+        <div style="border-top:1px solid var(--gold);padding-top:13px;"><div style="font-weight:800;font-size:42px;color:var(--gold);">89<span style="font-size:21px;color:var(--cream)"> 本</span></div><div style="font-size:14px;line-height:1.7;color:var(--muted);">［自分のチャンネルの説明：企画から公開まで一人で回した量と、その中で得た型］</div></div>
+      </div>
+      <div style="display:flex;gap:21px;margin-top:34px;align-items:center;">
+        <span style="font-size:12px;letter-spacing:.3em;color:var(--muted);">TOOLS</span>
+        <span style="display:flex;gap:8px;align-items:center;"><i style="width:34px;height:34px;background:#2a0a55;border:1px solid #9999ff;display:grid;place-items:center;font-style:normal;font-weight:700;color:#9999ff;font-size:13px;">Pr</i>Premiere Pro</span>
+        <span style="display:flex;gap:8px;align-items:center;"><i style="width:34px;height:34px;background:#1a0b33;border:1px solid #9999ff;display:grid;place-items:center;font-style:normal;font-weight:700;color:#d29fff;font-size:13px;">Ae</i>After Effects</span>
+        <span style="display:flex;gap:8px;align-items:center;"><i style="width:34px;height:34px;background:#001e36;border:1px solid #31a8ff;display:grid;place-items:center;font-style:normal;font-weight:700;color:#31a8ff;font-size:13px;">Ps</i>Photoshop</span>
+        <span style="display:flex;gap:8px;align-items:center;"><i style="width:34px;height:34px;background:#2b0a0a;border:1px solid #ff6a3d;display:grid;place-items:center;font-style:normal;font-weight:700;color:#ff6a3d;font-size:13px;">Fi</i>Firefly</span>
+      </div>
+    </div>
+  </div>
+  <div class="progress"><i></i><i></i><i class="on"></i><i></i><i></i></div>
+</section>
+<div class="caption"><b>コマ3：プロフィール</b>　カードが螺旋から正面に来て、大きく開く。写真は正方形のまま左、文章は右に並べ、空きを作らない。数字の下に、意味のある説明文。使用ソフトはロゴ＋文字（ロゴは仮。実装では各ソフトの公式アイコンの扱いを確認）。</div>
+
+<!-- 4. Pricing -->
+<section class="frame" id="f4">
+  <div class="stagebg"></div>
+  <div class="spot"></div>
+  <div class="logo">S.OMORI</div>
+  <div class="label">PRICING</div>
+  <div class="menu"><span>WORKS</span><span>PROFILE</span><span class="on">PRICING</span><span>CONTACT</span></div>
+  <div class="stage">
+    <div class="card" style="left:250px;top:220px;width:300px;height:440px;transform:translateZ(-120px) rotateY(24deg);justify-content:flex-start;"><div class="thumb" style="flex:0 0 186px;">THUMBNAIL</div><div class="t" style="font-size:21px">ショート動画</div><div style="font-weight:800;font-size:26px;color:var(--gold);margin-top:13px;">［相場調査後］</div><div class="s">60秒まで</div></div>
+    <div class="card front" style="left:570px;top:180px;width:340px;height:500px;transform:translateZ(40px);justify-content:flex-start;"><div class="thumb" style="flex:0 0 210px;">THUMBNAIL</div><span class="badge">MOST POPULAR</span><div class="t" style="font-size:26px">YouTube動画</div><div style="font-weight:800;font-size:30px;color:var(--gold);margin-top:13px;">［相場調査後］</div><div class="s">10分前後</div></div>
+    <div class="card" style="left:930px;top:220px;width:300px;height:440px;transform:translateZ(-120px) rotateY(-24deg);justify-content:flex-start;"><div class="thumb" style="flex:0 0 186px;">THUMBNAIL</div><div class="t" style="font-size:21px">広告風・予告編風</div><div style="font-weight:800;font-size:26px;color:var(--gold);margin-top:13px;">［相場調査後］</div><div class="s">企画・絵コンテから</div></div>
+  </div>
+  <div class="progress"><i></i><i></i><i></i><i class="on"></i><i></i></div>
+</section>
+<div class="caption"><b>コマ4：料金</b>　3枚のカードが扇形に並び、中央を強調。各カードの上部にサムネイル枠（参考作品の画像を入れる）。価格は国内相場を調べてから記入するため、ここでは空欄。</div>
+
+<!-- 5. Contact -->
+<section class="frame" id="f5">
+  <div class="stagebg"></div>
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 40% 60% at 50% 50%, rgba(201,162,74,.18), transparent 70%);"></div>
+  <div class="logo">S.OMORI</div>
+  <div class="label">CONTACT</div>
+  <div class="menu"><span>WORKS</span><span>PROFILE</span><span>PRICING</span><span class="on">CONTACT</span></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;height:233px;z-index:1;background:linear-gradient(to bottom,rgba(255,226,150,.35),transparent 8%),linear-gradient(to bottom,#2f62c9,#0e2a6e);clip-path:polygon(34% 0,66% 0,100% 100%,0 100%);box-shadow:inset 0 13px 34px rgba(255,255,255,.2);"></div>
+  <div style="position:absolute;left:50%;top:150px;transform:translateX(-50%);text-align:center;z-index:5;">
+    <div style="font-size:14px;letter-spacing:.4em;color:var(--gold);font-weight:700;">AND THE NEXT FILM IS…</div>
+    <div class="foil" style="font-size:68px;line-height:1.15;margin-top:21px;white-space:nowrap;">次の一本を、<br>一緒につくりませんか。</div>
+  </div>
+  <div class="stage">
+    <div class="card front" style="left:470px;top:460px;width:500px;height:240px;transform:translateZ(0) rotateX(8deg);background:linear-gradient(160deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.1) 30%, transparent 50%),linear-gradient(135deg,rgba(240,205,120,.92),rgba(168,129,47,.88));color:var(--night);justify-content:center;align-items:center;">
+      <div style="font-size:12px;letter-spacing:.3em;font-weight:700;">お問い合わせ</div>
+      <div style="font-weight:800;font-size:26px;margin-top:13px;">shintaroomori78@gmail.com</div>
+    </div>
+  </div>
+  <div class="progress"><i></i><i></i><i></i><i></i><i class="on"></i></div>
+</section>
+<div class="caption"><b>コマ5：お問い合わせ</b>　授賞式の封筒をイメージした金のカードにメールアドレス。下部にブルーノートの青い帯。「AND THE NEXT FILM IS…」で、次の依頼につなげる。</div>
+
+<script>
+// Curtain strips: two halves meet in the middle; data-open (0..1) gathers them to the sides.
+document.querySelectorAll('.curtain').forEach((curtain) => {
+  const open = Number(curtain.dataset.open);
+  const strips = 21; // per half
+  const halfW = 720 * (1 - open * 0.78);
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < strips; i += 1) {
+      const s = document.createElement('div');
+      s.className = 'strip';
+      const w = halfW / strips;
+      const x = side < 0 ? i * w : 1440 - (i + 1) * w;
+      // sway: gentle sine offset, stronger toward the inner edge
+      const inner = side < 0 ? i / strips : 1 - i / strips;
+      const sway = Math.sin(i * 0.9) * (1.5 + inner * 2.5);
+      s.style.left = (x - w * 0.15) + 'px';
+      s.style.width = (w * 1.3) + 'px';
+      s.style.transform = `skewX(${sway * 0.6}deg) scaleY(${1 - open * inner * 0.04})`;
+      curtain.appendChild(s);
+    }
+  }
+});
+
+// Seeded random so every render looks the same.
+let seed = 1618;
+const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+
+document.querySelectorAll('.frame').forEach((frame) => {
+  const c = document.createElement('canvas');
+  c.className = 'sparkle';
+  c.width = 1440; c.height = 900;
+  frame.prepend(c);
+  const g = c.getContext('2d');
+
+  // Soft bokeh: large blurred discs, mostly gold, some blue.
+  for (let i = 0; i < 34; i += 1) {
+    const x = rand() * 1440, y = rand() * 900, r = 8 + rand() * 34;
+    const gold = rand() > 0.3;
+    const grad = g.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, gold ? 'rgba(255,214,120,.45)' : 'rgba(140,180,255,.35)');
+    grad.addColorStop(0.7, gold ? 'rgba(255,214,120,.18)' : 'rgba(140,180,255,.12)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = grad;
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  }
+
+  // Glitter: tiny points, denser toward the top like falling confetti.
+  for (let i = 0; i < 420; i += 1) {
+    const x = rand() * 1440, y = Math.pow(rand(), 1.6) * 900, r = rand() * 1.4 + 0.3;
+    g.fillStyle = rand() > 0.5 ? 'rgba(255,236,190,' + (0.4 + rand() * 0.6) + ')' : 'rgba(255,214,120,' + (0.3 + rand() * 0.6) + ')';
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  }
+
+  // Star sparkles: four-point cross flares.
+  for (let i = 0; i < 21; i += 1) {
+    const x = rand() * 1440, y = rand() * 900, len = 8 + rand() * 21;
+    const glow = g.createRadialGradient(x, y, 0, x, y, len * 0.6);
+    glow.addColorStop(0, 'rgba(255,248,220,.95)');
+    glow.addColorStop(1, 'rgba(255,248,220,0)');
+    g.fillStyle = glow;
+    g.beginPath(); g.arc(x, y, len * 0.6, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = 'rgba(255,240,200,.8)';
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(x - len, y); g.lineTo(x + len, y);
+    g.moveTo(x, y - len); g.lineTo(x, y + len);
+    g.stroke();
+  }
+});
+</script>
+<script type="module" src="gl.js"></script>
+</body>
+</html>

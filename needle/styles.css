@@ -421,6 +421,101 @@ button {
   min-height: 61.8vh;
 }
 
+/* ---------- Chapter tag (portfolio video style) ---------- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  margin: 0;
+  padding: 0 var(--s3) 0 var(--s2);
+  font-family: var(--latin);
+  font-size: 26px;
+  letter-spacing: 0.04em;
+  background: linear-gradient(90deg, #1f58cf, #2f6fe0 60%, rgba(47, 111, 224, 0));
+  border-left: 7px solid var(--orange);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- About: live halftone + liner notes ---------- */
+.about {
+  display: grid;
+  grid-template-columns: 1fr 1.618fr;
+  align-items: center;
+  gap: var(--s6);
+  min-height: 100vh;
+  padding: var(--s7) var(--s5);
+  /* plain dotted ground so the halftone reads as a print */
+  background:
+    radial-gradient(circle, rgba(111, 176, 255, 0.16) 1px, transparent 1.6px) 0 0 / 13px 13px,
+    var(--navy);
+}
+
+.halftone-wrap {
+  position: relative;
+}
+
+.halftone {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  box-shadow: 0 var(--s4) var(--s5) rgba(0, 0, 0, 0.55);
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+
+.side {
+  margin: var(--s2) 0 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--sub);
+}
+
+.about-copy {
+  max-width: 640px;
+}
+
+.name {
+  margin: var(--s3) 0 0;
+  font-family: var(--latin);
+  font-weight: 400;
+  font-size: clamp(55px, 6.2vw, 89px);
+  line-height: 1;
+}
+
+.role {
+  display: inline-block;
+  margin: var(--s3) 0 0;
+  padding: var(--s1) var(--s3);
+  font-weight: 900;
+  font-size: 21px;
+  background: linear-gradient(90deg, #1f58cf, rgba(31, 88, 207, 0));
+  border-left: 5px solid var(--orange);
+}
+
+.about .catalog {
+  margin-top: var(--s4);
+}
+
+.notes {
+  columns: 2;
+  column-gap: var(--s4);
+  margin-top: var(--s2);
+  padding-top: var(--s3);
+  border-top: 1px solid rgba(111, 176, 255, 0.35);
+  font-size: 15px;
+  line-height: 1.95;
+  color: var(--sub);
+}
+
+.notes p {
+  margin: 0 0 var(--s2);
+}
+
+.notes strong {
+  font-weight: 900;
+}
+
 /* ---------- Phones ---------- */
 @media (max-width: 767px) {
   :root {
@@ -445,6 +540,16 @@ button {
 
   .deck {
     justify-self: start;
+  }
+
+  .about {
+    grid-template-columns: 1fr;
+    gap: var(--s5);
+    padding: var(--s6) var(--s3);
+  }
+
+  .notes {
+    columns: 1;
   }
 }
 

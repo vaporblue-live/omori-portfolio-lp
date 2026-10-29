@@ -107,3 +107,119 @@ function pulse() {
   root.style.setProperty("--beat", level.toFixed(3));
   requestAnimationFrame(pulse);
 }
+
+// ---------- About: live halftone portrait ----------
+// The portrait is re-printed as navy dots on cream paper. Dot size follows the
+// photo's darkness; dots swell around the pointer and, while music plays, on
+// the beat. It draws only while the canvas is on screen.
+const halftone = document.querySelector(".halftone");
+if (halftone) {
+  const g = halftone.getContext("2d");
+  const photo = new Image();
+  photo.src = "images/portrait.webp";
+
+  let cells = null; // { cols, rows, step, ink: Float32Array }
+  let pointer = null; // last pointer position, kept so the swell can fade out
+  let inside = false;
+  let reach = 0; // eases toward 1 while the pointer is over the canvas
+  let visible = false;
+
+  function sample() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = halftone.clientWidth;
+    const h = halftone.clientHeight;
+    if (!w || !h || !photo.complete) return;
+    halftone.width = Math.round(w * dpr);
+    halftone.height = Math.round(h * dpr);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const step = Math.max(6, w / 68);
+    const cols = Math.ceil(w / step);
+    const rows = Math.ceil(h / step);
+    const off = document.createElement("canvas");
+    off.width = cols;
+    off.height = rows;
+    const og = off.getContext("2d");
+    const s = Math.max(cols / photo.naturalWidth, rows / photo.naturalHeight);
+    og.drawImage(photo, (cols - photo.naturalWidth * s) / 2, (rows - photo.naturalHeight * s) / 2, photo.naturalWidth * s, photo.naturalHeight * s);
+    const px = og.getImageData(0, 0, cols, rows).data;
+
+    const lum = new Float32Array(cols * rows);
+    let lo = 1;
+    let hi = 0;
+    for (let i = 0; i < lum.length; i += 1) {
+      const l = (px[i * 4] * 0.3 + px[i * 4 + 1] * 0.59 + px[i * 4 + 2] * 0.11) / 255;
+      lum[i] = l;
+      lo = Math.min(lo, l);
+      hi = Math.max(hi, l);
+    }
+    const ink = new Float32Array(lum.length);
+    for (let i = 0; i < lum.length; i += 1) ink[i] = Math.pow(1 - (lum[i] - lo) / (hi - lo || 1), 0.9);
+    cells = { cols, rows, step, ink, w, h };
+  }
+
+  function draw() {
+    if (!cells) return;
+    const { cols, rows, step, ink, w, h } = cells;
+    g.fillStyle = "#f2ead8";
+    g.fillRect(0, 0, w, h);
+    g.fillStyle = "#0a1430";
+    const radius = w * 0.2;
+    const beat = reduceMotion ? 0 : level;
+    for (let y = 0; y < rows; y += 1) {
+      const cy = y * step + step / 2;
+      const shift = y % 2 ? step / 2 : 0;
+      for (let x = 0; x < cols; x += 1) {
+        const k = ink[y * cols + x];
+        const cx = x * step + shift;
+        let boost = 0;
+        if (pointer && reach > 0) {
+          const d = Math.hypot(cx - pointer.x, cy - pointer.y);
+          boost = Math.max(0, 1 - d / radius) * 0.6 * reach;
+        }
+        const r = (step / 2) * 1.15 * Math.min(1, k + boost * k + boost * 0.25 + beat * k * 0.3);
+        if (r < 0.35) continue;
+        g.beginPath();
+        g.arc(cx, cy, r, 0, Math.PI * 2);
+        g.fill();
+      }
+    }
+    // printed register bars, as on the sleeve
+    g.fillStyle = "#f08a24";
+    g.fillRect(0, h - 26, w, 10);
+    g.fillStyle = "#f5c242";
+    g.fillRect(0, h - 10, w, 10);
+  }
+
+  function loop() {
+    if (!visible) return;
+    reach += ((inside ? 1 : 0) - reach) * 0.15;
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  photo.addEventListener("load", () => {
+    sample();
+    draw();
+  });
+  new ResizeObserver(() => {
+    sample();
+    draw();
+  }).observe(halftone);
+
+  if (!reduceMotion) {
+    halftone.addEventListener("pointermove", (e) => {
+      const rect = halftone.getBoundingClientRect();
+      pointer = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      inside = true;
+    });
+    halftone.addEventListener("pointerleave", () => {
+      inside = false;
+    });
+    new IntersectionObserver((entries) => {
+      const was = visible;
+      visible = entries[0].isIntersecting;
+      if (visible && !was) requestAnimationFrame(loop);
+    }).observe(halftone);
+  }
+}

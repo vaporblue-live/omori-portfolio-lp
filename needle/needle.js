@@ -563,3 +563,18 @@ if (reelVideo) {
   });
   render();
 }
+
+// ---------- Design & motion: the 45 rpm single ----------
+// Tapping the single lifts it off the shelf and sets it spinning at 45 rpm; tap
+// again to put it back. With the sound on, it answers with a soft hat.
+const single = document.querySelector(".single-record");
+const singleCue = document.querySelector(".single-cue");
+if (single) {
+  single.addEventListener("click", () => {
+    const on = single.getAttribute("aria-pressed") !== "true";
+    single.setAttribute("aria-pressed", String(on));
+    single.setAttribute("aria-label", on ? "シングル盤を戻す" : "シングル盤を乗せて回す");
+    singleCue.textContent = on ? "45回転で再生中（タップで戻す）" : "タップで乗せる";
+    if (playing && ctx) voice("drums", on ? "kick" : "hat", 0);
+  });
+}

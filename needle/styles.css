@@ -512,6 +512,24 @@ button {
   margin: 0 0 var(--s2);
 }
 
+/* The credo: the one line the rest of the notes explain. */
+.credo {
+  margin: var(--s4) 0 var(--s3);
+  font-family: var(--jp);
+  font-weight: 900;
+  font-size: clamp(34px, 3.4vw, 55px);
+  line-height: 1.236;
+  letter-spacing: 0.02em;
+}
+
+.credo span {
+  display: inline-block;
+}
+
+.credo .y {
+  transform: translateY(calc(var(--beat, 0) * -3px));
+}
+
 .notes strong {
   font-weight: 900;
 }

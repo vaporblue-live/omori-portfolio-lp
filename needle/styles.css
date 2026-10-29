@@ -512,22 +512,53 @@ button {
   margin: 0 0 var(--s2);
 }
 
-/* The credo: the one line the rest of the notes explain. */
+/* The credo: four lines played one after another like tracks on a side.
+   All lines share one grid cell, so the block keeps the height of the tallest. */
 .credo {
   margin: var(--s4) 0 var(--s3);
+}
+
+.credo-lines {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
   font-family: var(--jp);
   font-weight: 900;
-  font-size: clamp(34px, 3.4vw, 55px);
+  font-size: clamp(30px, 3.4vw, 55px);
   line-height: 1.236;
   letter-spacing: 0.02em;
 }
 
-.credo span {
-  display: inline-block;
+.credo-lines li {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(calc(var(--s2) * -1));
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.credo .y {
+/* the old line leaves first, then the new one drops in, so they never overlap */
+.credo-lines li.is-on {
+  opacity: 1;
+  transform: none;
+  transition-duration: 0.5s;
+  transition-delay: 0.3s;
+}
+
+.credo-lines span {
+  display: block;
+}
+
+.credo-lines .y {
   transform: translateY(calc(var(--beat, 0) * -3px));
+}
+
+.credo-count {
+  margin: var(--s2) 0 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.21em;
+  color: var(--sky);
 }
 
 .notes strong {
@@ -573,6 +604,21 @@ button {
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
+  /* show the four credo lines as a plain list instead of rotating them */
+  .credo-lines {
+    gap: var(--s2);
+  }
+
+  .credo-lines li {
+    grid-area: auto;
+    opacity: 1;
+    transform: none;
+  }
+
+  .credo-count {
+    display: none;
+  }
+
   html {
     scroll-behavior: auto;
   }

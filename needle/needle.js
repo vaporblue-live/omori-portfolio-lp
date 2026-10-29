@@ -223,3 +223,32 @@ if (halftone) {
     }).observe(halftone);
   }
 }
+
+// ---------- About: the credo ----------
+// Four lines take turns like tracks on a side. While music plays, the next line
+// waits for a strong beat so the change lands on the music.
+const credoLines = [...document.querySelectorAll(".credo-lines li")];
+const credoNow = document.querySelector(".credo-now");
+if (credoLines.length > 1 && !reduceMotion) {
+  const HOLD = 4236; // ms each line stays before it may change
+  let current = 0;
+  let shownAt = performance.now();
+
+  function show(next) {
+    credoLines[current].classList.remove("is-on");
+    current = next;
+    credoLines[current].classList.add("is-on");
+    credoNow.textContent = String(current + 1).padStart(2, "0");
+    shownAt = performance.now();
+  }
+
+  function tick(now) {
+    const due = now - shownAt > HOLD;
+    // with music, change on a beat; without it (or if no beat comes), on time
+    if (due && (!playing || level > 0.8 || now - shownAt > HOLD * 1.618)) {
+      show((current + 1) % credoLines.length);
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}

@@ -252,3 +252,131 @@ if (credoLines.length > 1 && !reduceMotion) {
   }
   requestAnimationFrame(tick);
 }
+
+// ---------- Skill & tools: the quartet ----------
+// Each tool is a player. Hovering (or focusing) a card plays a short phrase on its
+// instrument and draws the waveform. Sound only when the visitor has turned it on;
+// the waveform draws either way. Notes are from the F minor pentatonic so they sit
+// with the track.
+const players = [...document.querySelectorAll(".player")];
+const NOTE = { F2: 87.31, C3: 130.81, F3: 174.61, Ab3: 207.65, Bb3: 233.08, C4: 261.63, Eb4: 311.13, F4: 349.23, Ab4: 415.3, C5: 523.25 };
+const PHRASE = {
+  bass: [["F2", 0], ["C3", 0.18], ["F3", 0.36]],
+  drums: [["kick", 0], ["hat", 0.12], ["snare", 0.24], ["hat", 0.36]],
+  piano: [["F3", 0], ["Ab3", 0], ["C4", 0], ["Eb4", 0]],
+  horn: [["C4", 0], ["Eb4", 0.15], ["F4", 0.3], ["Ab4", 0.45]],
+};
+// waveform shape drawn for each voice: amplitude over x (0..1) at time t
+const SHAPE = {
+  bass: (x, t) => Math.sin(x * 9 + t * 12) * Math.exp(-x * 1.2),
+  drums: (x, t) => (Math.sin(x * 140 + t * 40) * Math.sin(x * 57)) * Math.exp(-((x * 4) % 1) * 3),
+  piano: (x, t) => (Math.sin(x * 18 + t * 8) + Math.sin(x * 27 + t * 8) * 0.6) * 0.62 * Math.exp(-x * 2),
+  horn: (x, t) => (((x * 14 + t * 6) % 1) * 2 - 1) * Math.min(1, x * 6) * Math.exp(-x * 0.8),
+};
+
+function voice(type, name, at) {
+  const out = ctx.createGain();
+  out.connect(ctx.destination);
+  const t = ctx.currentTime + at;
+  if (type === "drums") {
+    if (name === "kick") {
+      const o = ctx.createOscillator();
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(45, t + 0.15);
+      out.gain.setValueAtTime(0.5, t);
+      out.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+      o.connect(out);
+      o.start(t);
+      o.stop(t + 0.21);
+      return;
+    }
+    const len = name === "hat" ? 0.05 : 0.15;
+    const buf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * len), ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i += 1) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const f = ctx.createBiquadFilter();
+    f.type = name === "hat" ? "highpass" : "bandpass";
+    f.frequency.value = name === "hat" ? 7000 : 1800;
+    out.gain.setValueAtTime(name === "hat" ? 0.12 : 0.3, t);
+    out.gain.exponentialRampToValueAtTime(0.001, t + len);
+    src.connect(f).connect(out);
+    src.start(t);
+    return;
+  }
+  const o = ctx.createOscillator();
+  o.type = { bass: "sine", piano: "triangle", horn: "sawtooth" }[type];
+  o.frequency.value = NOTE[name];
+  const len = { bass: 0.3, piano: 0.9, horn: 0.22 }[type];
+  const peakGain = { bass: 0.4, piano: 0.1, horn: 0.05 }[type];
+  out.gain.setValueAtTime(0.0001, t);
+  out.gain.linearRampToValueAtTime(peakGain, t + (type === "horn" ? 0.04 : 0.01));
+  out.gain.exponentialRampToValueAtTime(0.001, t + len);
+  if (type === "horn") {
+    // a muted trumpet: soften the saw with a low-pass
+    const f = ctx.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.value = 1600;
+    o.connect(f).connect(out);
+  } else {
+    o.connect(out);
+  }
+  o.start(t);
+  o.stop(t + len + 0.02);
+}
+
+players.forEach((card) => {
+  const type = card.dataset.voice;
+  const canvas = card.querySelector(".wave");
+  const g = canvas.getContext("2d");
+  const color = getComputedStyle(card).borderTopColor;
+  let start = 0;
+  let lastPlay = 0;
+
+  function draw(now) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    if (canvas.width !== Math.round(w * dpr)) {
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, w, h);
+    const t = (now - start) / 1000;
+    const env = start ? Math.max(0, 1 - t / 1.2) : 0;
+    g.strokeStyle = color;
+    g.lineWidth = 2;
+    g.globalAlpha = 0.35 + env * 0.65;
+    g.beginPath();
+    for (let x = 0; x <= w; x += 2) {
+      const y = h / 2 - SHAPE[type](x / w, t) * (h / 2 - 3) * env;
+      if (x === 0) g.moveTo(x, y);
+      else g.lineTo(x, y);
+    }
+    g.stroke();
+    if (env > 0) requestAnimationFrame(draw);
+    else card.classList.remove("is-sounding");
+  }
+
+  function play() {
+    const now = performance.now();
+    if (now - lastPlay < 600) return; // one phrase at a time
+    lastPlay = now;
+    card.classList.add("is-sounding");
+    if (playing && ctx) PHRASE[type].forEach(([name, at]) => voice(type, name, at));
+    if (reduceMotion) {
+      start = 0;
+      requestAnimationFrame(draw);
+      return;
+    }
+    const running = start && now - start < 1200;
+    start = now;
+    if (!running) requestAnimationFrame(draw);
+  }
+
+  card.addEventListener("pointerenter", play);
+  card.addEventListener("focus", play);
+  requestAnimationFrame(draw); // flat line at rest
+});

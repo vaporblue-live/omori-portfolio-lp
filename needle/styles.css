@@ -682,7 +682,287 @@ button {
   color: var(--sub);
 }
 
+/* ---------- Works: the record crate ---------- */
+.works {
+  --jw: clamp(240px, 26vw, 377px);
+  padding: var(--s7) var(--s5);
+}
+
+.works-title {
+  margin: var(--s3) 0 0;
+  font-family: var(--latin);
+  font-weight: 400;
+  font-size: clamp(34px, 5.6vw, 89px);
+  line-height: 1;
+}
+
+.works-title span {
+  display: inline-block;
+}
+
+.works-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 440px);
+  justify-content: center;
+  align-items: end;
+  gap: var(--s7);
+  margin-top: var(--s5);
+}
+
+.crate {
+  display: grid;
+  justify-items: center;
+  gap: var(--s4);
+}
+
+/* Sleeves stand front to back. --d is a sleeve's distance behind the front one:
+   0 is the front, 1 and 2 stand behind, negatives have been flipped forward. */
+.bin {
+  position: relative;
+  width: var(--jw);
+  height: calc(var(--jw) * 1.618);
+  perspective: 1400px;
+  perspective-origin: 50% -34%;
+  outline: none;
+  touch-action: pan-x;
+}
+
+.bin:focus-visible {
+  box-shadow: 0 0 0 2px var(--sky);
+}
+
+.jacket {
+  --d: 0;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: var(--jw);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+  transform-style: preserve-3d;
+  transform:
+    translateY(calc(var(--d) * -34px))
+    translateZ(calc(var(--d) * -55px))
+    rotateX(calc(var(--d) * 6deg));
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
+}
+
+.jacket.is-past {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(var(--s4)) rotateX(-78deg);
+}
+
+.jacket-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1.618fr 1fr;
+  overflow: hidden;
+  background: var(--c);
+  box-shadow: 0 21px 34px rgba(0, 0, 0, 0.45);
+}
+
+/* the sleeves at the back are printed in one colour; the front one comes up in full colour */
+.jacket-art {
+  display: block;
+  overflow: hidden;
+  background: var(--c);
+}
+
+.jacket-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.236);
+  mix-blend-mode: multiply;
+  transition: filter 0.6s ease;
+}
+
+.jacket.is-front .jacket-art img {
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.jacket-type {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 var(--s3);
+  text-align: left;
+  color: var(--navy);
+}
+
+.jacket-no {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.21em;
+}
+
+.jacket-title {
+  font-family: var(--latin);
+  font-weight: 900;
+  font-size: clamp(21px, 2.4vw, 34px);
+  line-height: 1.236;
+}
+
+/* the record inside the sleeve; on the front sleeve it is pulled up and spins */
+.disc {
+  position: absolute;
+  left: 4%;
+  top: 4%;
+  width: 92%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 17%, rgba(255, 255, 255, 0.06) 17.4%, transparent 18%),
+    repeating-radial-gradient(circle, #0b0b10 0 2px, #17171f 2px 3px);
+  transform: translateZ(-1px);
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s;
+}
+
+.jacket.is-front .disc {
+  transform: translateZ(-1px) translateY(-50%);
+}
+
+.disc-label {
+  position: absolute;
+  inset: 34%;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-family: var(--latin);
+  font-size: 21px;
+  color: var(--navy);
+  background: var(--c);
+}
+
+.is-playing .jacket.is-front .disc-label {
+  animation: spin 1.8s linear infinite;
+}
+
+.crate-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.crate-btn {
+  width: var(--s5);
+  height: var(--s5);
+  border: 1px solid rgba(111, 176, 255, 0.5);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.crate-btn:hover,
+.crate-btn:focus-visible {
+  background: rgba(111, 176, 255, 0.2);
+}
+
+.crate-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.crate-count {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.21em;
+  color: var(--sky);
+}
+
+.work-info {
+  max-width: 440px;
+  padding-bottom: var(--s6);
+}
+
+.work-no {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.21em;
+  color: var(--gold);
+}
+
+.work-title {
+  margin: var(--s1) 0 0;
+  font-weight: 900;
+  font-size: clamp(34px, 3.4vw, 55px);
+  line-height: 1.236;
+}
+
+.work-meta {
+  margin: var(--s3) 0 0;
+  border-top: 1px solid rgba(111, 176, 255, 0.35);
+}
+
+.work-meta div {
+  display: grid;
+  grid-template-columns: var(--s6) 1fr;
+  padding: var(--s1) 0;
+  border-bottom: 1px solid rgba(111, 176, 255, 0.18);
+}
+
+.work-meta dt {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--orange);
+}
+
+.work-meta dd {
+  margin: 0;
+  font-size: 15px;
+}
+
+.work-comment {
+  margin: var(--s3) 0 0;
+  font-size: 15px;
+  line-height: 1.95;
+  color: var(--sub);
+}
+
+.work-note {
+  margin: var(--s1) 0 0;
+  font-size: 13px;
+  color: var(--sub);
+}
+
+.work-link {
+  display: inline-block;
+  margin-top: var(--s4);
+  padding: var(--s2) var(--s4);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--navy);
+  text-decoration: none;
+  background: var(--yellow);
+  transition: background 0.3s ease;
+}
+
+.work-link:hover,
+.work-link:focus-visible {
+  background: var(--white);
+}
+
 @media (max-width: 1100px) {
+  .works-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s5);
+  }
+
+  .work-info {
+    max-width: none;
+    padding-bottom: 0;
+  }
+
   .players {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -695,6 +975,11 @@ button {
 
 /* ---------- Phones ---------- */
 @media (max-width: 767px) {
+  .works {
+    --jw: min(72vw, 280px);
+    padding: var(--s6) var(--s3);
+  }
+
   .quartet {
     padding: var(--s6) var(--s3);
   }
@@ -744,6 +1029,12 @@ button {
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
+  .jacket,
+  .disc,
+  .jacket-art img {
+    transition: none;
+  }
+
   /* show the four credo lines as a plain list instead of rotating them */
   .credo-lines {
     gap: var(--s2);

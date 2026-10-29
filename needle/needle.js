@@ -380,3 +380,71 @@ players.forEach((card) => {
   card.addEventListener("focus", play);
   requestAnimationFrame(draw); // flat line at rest
 });
+
+// ---------- Works: the record crate ----------
+// Sleeves stand front to back. Flipping brings the next sleeve to the front, where
+// it comes up in full colour and its record is pulled out. With the sound on, a
+// flip ticks and a pull lands with a soft thump.
+const jackets = [...document.querySelectorAll(".jacket")];
+const workArticles = [...document.querySelectorAll(".work")];
+const bin = document.querySelector(".bin");
+if (jackets.length) {
+  const crateNow = document.querySelector(".crate-now");
+  const [prevBtn, nextBtn] = document.querySelectorAll(".crate-btn");
+  let front = 0;
+
+  function pick(i, withSound = true) {
+    const next = Math.max(0, Math.min(jackets.length - 1, i));
+    const moved = next !== front;
+    front = next;
+    jackets.forEach((j, k) => {
+      const d = k - front;
+      j.style.setProperty("--d", String(Math.max(d, 0)));
+      j.style.zIndex = String(jackets.length - Math.abs(d));
+      j.classList.toggle("is-front", d === 0);
+      j.classList.toggle("is-past", d < 0);
+      j.setAttribute("aria-pressed", String(d === 0));
+      j.tabIndex = d === 0 ? 0 : -1;
+    });
+    workArticles.forEach((a, k) => (a.hidden = k !== front));
+    crateNow.textContent = String(front + 1).padStart(2, "0");
+    prevBtn.disabled = front === 0;
+    nextBtn.disabled = front === jackets.length - 1;
+    if (withSound && moved && playing && ctx) {
+      voice("drums", "hat", 0);
+      voice("drums", "kick", 0.2);
+    }
+  }
+
+  let swiped = false; // a swipe ends with a click on the old sleeve; ignore it
+  jackets.forEach((j, k) =>
+    j.addEventListener("click", () => {
+      if (swiped) swiped = false;
+      else pick(k);
+    }),
+  );
+  prevBtn.addEventListener("click", () => pick(front - 1));
+  nextBtn.addEventListener("click", () => pick(front + 1));
+  bin.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") pick(front + 1);
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") pick(front - 1);
+    else return;
+    e.preventDefault();
+  });
+
+  // swipe across the crate to flip (left = next)
+  let downX = null;
+  bin.addEventListener("pointerdown", (e) => (downX = e.clientX));
+  bin.addEventListener("pointerup", (e) => {
+    if (downX === null) return;
+    const dx = e.clientX - downX;
+    downX = null;
+    if (Math.abs(dx) > 34) {
+      swiped = true;
+      setTimeout(() => (swiped = false), 0);
+      pick(front + (dx < 0 ? 1 : -1));
+    }
+  });
+
+  pick(0, false);
+}

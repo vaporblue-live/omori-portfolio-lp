@@ -448,3 +448,118 @@ if (jackets.length) {
 
   pick(0, false);
 }
+
+// ---------- Works: the full reel ----------
+// The platter is tied to the video's clock: one turn is REV seconds of picture.
+// Dragging it scratches the film forward and back; the play button runs it
+// normally and the platter turns with it. Playing the reel pauses the music.
+const reelVideo = document.querySelector(".reel-video");
+if (reelVideo) {
+  const REV = 13;
+  const platter = document.querySelector(".platter");
+  const disc = platter.querySelector(".platter-disc");
+  const playBtn = document.querySelector(".reel-play");
+  const nowEl = document.querySelector(".reel-now");
+  const lenEl = document.querySelector(".reel-len");
+  const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  let dragging = false;
+  let lastAngle = 0;
+  let wanted = null; // scrub target, applied once per frame
+
+  const start = () => reelVideo.classList.add("is-started");
+  const length = () => (Number.isFinite(reelVideo.duration) ? reelVideo.duration : 79);
+
+  function render() {
+    const t = reelVideo.currentTime;
+    if (!reduceMotion) disc.style.setProperty("--angle", `${(t / REV) * 360}deg`);
+    nowEl.textContent = clock(t);
+    platter.setAttribute("aria-valuenow", String(Math.round(t)));
+  }
+
+  function frame() {
+    if (wanted !== null) {
+      reelVideo.currentTime = wanted;
+      wanted = null;
+    }
+    render();
+    if (dragging || !reelVideo.paused) requestAnimationFrame(frame);
+  }
+
+  function setPlayUi() {
+    const on = !reelVideo.paused;
+    playBtn.textContent = on ? "❚❚" : "▶";
+    playBtn.setAttribute("aria-label", on ? "動画を止める" : "動画を再生");
+  }
+
+  const pointerAngle = (e) => {
+    const r = platter.getBoundingClientRect();
+    return (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180) / Math.PI;
+  };
+
+  platter.addEventListener("pointerdown", (e) => {
+    start();
+    dragging = true;
+    lastAngle = pointerAngle(e);
+    wanted = reelVideo.currentTime;
+    reelVideo.dataset.wasPlaying = String(!reelVideo.paused);
+    reelVideo.pause();
+    platter.classList.add("is-dragging");
+    requestAnimationFrame(frame);
+    try {
+      platter.setPointerCapture(e.pointerId);
+    } catch {
+      /* the drag still works while the pointer stays over the platter */
+    }
+  });
+
+  platter.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const a = pointerAngle(e);
+    let d = a - lastAngle;
+    if (d > 180) d -= 360;
+    if (d < -180) d += 360;
+    lastAngle = a;
+    const base = wanted ?? reelVideo.currentTime;
+    wanted = Math.max(0, Math.min(length(), base + (d / 360) * REV));
+  });
+
+  function release() {
+    if (!dragging) return;
+    dragging = false;
+    platter.classList.remove("is-dragging");
+    if (reelVideo.dataset.wasPlaying === "true") reelVideo.play();
+  }
+  platter.addEventListener("pointerup", release);
+  platter.addEventListener("pointercancel", release);
+
+  platter.addEventListener("keydown", (e) => {
+    const step = e.key === "ArrowRight" || e.key === "ArrowUp" ? 2 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -2 : 0;
+    if (!step) return;
+    start();
+    reelVideo.currentTime = Math.max(0, Math.min(length(), reelVideo.currentTime + step));
+    render();
+    e.preventDefault();
+  });
+
+  playBtn.addEventListener("click", async () => {
+    if (reelVideo.paused) {
+      if (playing) await toggle(); // pause the music first
+      if (reelVideo.ended) reelVideo.currentTime = 0;
+      reelVideo.play().catch(console.error);
+    } else {
+      reelVideo.pause();
+    }
+  });
+  reelVideo.addEventListener("play", () => {
+    start();
+    setPlayUi();
+    requestAnimationFrame(frame);
+  });
+  reelVideo.addEventListener("pause", setPlayUi);
+  reelVideo.addEventListener("ended", setPlayUi);
+  reelVideo.addEventListener("loadedmetadata", () => {
+    lenEl.textContent = clock(length());
+    platter.setAttribute("aria-valuemax", String(Math.round(length())));
+  });
+  render();
+}

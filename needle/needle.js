@@ -597,3 +597,33 @@ if (paper) {
     io.observe(paper);
   }
 }
+
+// ---------- Contact: the label turns once, then the mail opens ----------
+const labelBtn = document.querySelector(".label-btn");
+if (labelBtn) {
+  labelBtn.addEventListener("click", (e) => {
+    if (reduceMotion || labelBtn.classList.contains("is-turning")) return;
+    e.preventDefault();
+    labelBtn.classList.add("is-turning");
+    if (playing && ctx) voice("drums", "kick", 0);
+    labelBtn.querySelector(".label-disc").addEventListener(
+      "animationend",
+      () => {
+        labelBtn.classList.remove("is-turning");
+        window.location.href = labelBtn.href;
+      },
+      { once: true },
+    );
+  });
+
+  const copyBtn = document.querySelector(".contact-copy");
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText("shintaroomori78@gmail.com");
+      copyBtn.textContent = "コピーしました";
+    } catch {
+      copyBtn.textContent = "コピーできませんでした";
+    }
+    setTimeout(() => (copyBtn.textContent = "アドレスをコピー"), 2618);
+  });
+}

@@ -1084,6 +1084,187 @@ button {
   font-size: 15px;
 }
 
+/* ---------- Contact: the record label is the button ---------- */
+.contact {
+  --lw: clamp(240px, 30vw, 377px);
+  padding: var(--s7) var(--s5) var(--s6);
+}
+
+.contact-title {
+  margin: var(--s3) 0 0;
+  font-weight: 900;
+  font-size: clamp(55px, 7.6vw, 144px);
+  line-height: 1.1;
+}
+
+.contact-row {
+  display: block;
+}
+
+.contact-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--s6);
+  margin-top: var(--s5);
+}
+
+.label-btn {
+  display: block;
+  width: var(--lw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  text-decoration: none;
+  color: var(--navy);
+  background: repeating-radial-gradient(circle, #0b0b10 0 2px, #17171f 2px 3px);
+  box-shadow: 0 0 0 var(--s1) #1a2a55, 0 34px 55px rgba(0, 0, 0, 0.5);
+  transform: scale(calc(1 + var(--beat, 0) * 0.021));
+  transition: box-shadow 0.3s ease;
+}
+
+.label-btn:hover,
+.label-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--s1) var(--orange), 0 34px 55px rgba(0, 0, 0, 0.5);
+}
+
+.label-disc {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.label-face {
+  position: relative;
+  display: grid;
+  place-content: center;
+  gap: var(--s1);
+  width: 61.8%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  text-align: center;
+  background: var(--orange);
+  transition: background 0.3s ease;
+}
+
+.label-btn:hover .label-face,
+.label-btn:focus-visible .label-face {
+  background: var(--yellow);
+}
+
+.label-top {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.13em;
+}
+
+.label-main {
+  font-family: var(--latin);
+  font-size: clamp(21px, 2.6vw, 34px);
+  line-height: 1;
+}
+
+.label-sub {
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.label-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--s1);
+  height: var(--s1);
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: var(--navy);
+  opacity: 0.34;
+}
+
+/* one full turn before the mail opens */
+.label-btn.is-turning .label-disc {
+  animation: label-turn 0.618s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes label-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.contact-mail {
+  margin: var(--s1) 0 0;
+  font-family: var(--latin);
+  font-size: clamp(21px, 2.6vw, 34px);
+  line-height: 1.236;
+  overflow-wrap: anywhere;
+}
+
+.contact-copy {
+  margin-top: var(--s3);
+  padding: var(--s1) var(--s3);
+  border: 1px solid rgba(111, 176, 255, 0.5);
+  font-size: 13px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.contact-copy:hover,
+.contact-copy:focus-visible {
+  background: rgba(111, 176, 255, 0.2);
+}
+
+.contact-note {
+  margin: var(--s3) 0 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--sub);
+}
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s2) var(--s4);
+  padding: var(--s4) var(--s5) var(--s5);
+  border-top: 1px solid rgba(111, 176, 255, 0.35);
+  font-size: 13px;
+}
+
+.footer-name {
+  margin: 0;
+  font-family: var(--latin);
+}
+
+.footer-links {
+  display: flex;
+  gap: var(--s4);
+  margin: 0;
+}
+
+.footer-links a {
+  font-family: var(--mono);
+  letter-spacing: 0.13em;
+  color: var(--sky);
+  text-decoration: none;
+}
+
+.footer-links a:hover,
+.footer-links a:focus-visible {
+  color: var(--yellow);
+}
+
+.footer-credit {
+  flex-basis: 100%;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--sub);
+}
+
 @media (max-width: 1100px) {
   .session-body {
     grid-template-columns: minmax(0, 1fr);
@@ -1112,6 +1293,26 @@ button {
 
 /* ---------- Phones ---------- */
 @media (max-width: 767px) {
+  .contact {
+    --lw: min(76vw, 300px);
+    padding: var(--s6) var(--s3) var(--s5);
+  }
+
+  .contact-body {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+
+  .site-footer {
+    padding: var(--s4) var(--s3);
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: var(--s1);
+  }
+
   .session {
     padding: var(--s6) var(--s3);
   }
@@ -1470,6 +1671,10 @@ button {
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
+  .label-btn {
+    transform: none;
+  }
+
   .paper {
     transform: none;
     opacity: 1;

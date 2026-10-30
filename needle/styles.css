@@ -1151,22 +1151,33 @@ button {
    jacket on the right at 1 : 1.618. The record waits in its sleeve and slides
    out when the pointer comes near; pressing it turns the record once and opens
    the mail. */
+/* Text and jacket form one group, centred on the page with 144px between
+   them; the jacket (the button) is the larger mass. */
+.contact {
+  display: grid;
+  align-items: center;
+  min-height: 89vh;
+}
+
 .contact-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.618fr);
-  align-items: stretch;
-  gap: var(--s6);
-  margin-top: var(--s4);
+  grid-template-columns: auto auto;
+  justify-content: center;
+  align-items: center;
+  gap: var(--s7);
 }
 
 .contact-text {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: var(--s5);
+  gap: var(--s4);
 }
 
-.contact-row {
+.contact-text .tag {
+  align-self: flex-start;
+}
+
+.contact-title .contact-row {
   display: block;
 }
 
@@ -1176,11 +1187,12 @@ button {
 }
 
 .label-btn {
-  --cw: clamp(240px, 26vw, 377px);
+  --cw: clamp(260px, 30vw, 440px);
   position: relative;
   display: block;
   justify-self: center;
-  width: calc(var(--cw) * 1.382);
+  /* only the jacket takes space; the record slides out over the margin */
+  width: var(--cw);
   height: var(--cw);
   text-decoration: none;
   color: var(--navy);
@@ -1405,18 +1417,13 @@ button {
 
 @media (max-width: 1100px) {
   .contact-body {
-    grid-template-columns: minmax(0, 1fr);
     gap: var(--s5);
   }
 
-  /* one column: headline, then the jacket (the button), then the mail details */
-  .contact-text {
-    display: contents;
+  .label-btn {
+    --cw: clamp(240px, 34vw, 340px);
   }
 
-  .contact-title { order: 1; }
-  .label-btn { order: 2; justify-self: start; }
-  .contact-info { order: 3; }
 
   .session-body {
     grid-template-columns: minmax(0, 1fr);
@@ -1445,6 +1452,27 @@ button {
 
 /* ---------- Phones ---------- */
 @media (max-width: 767px) {
+  .contact {
+    min-height: 0;
+  }
+
+  .contact-body {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+    gap: var(--s5);
+  }
+
+  .contact-text .tag { order: 0; justify-self: start; }
+
+  /* one column: headline, then the jacket (the button), then the mail details */
+  .contact-text {
+    display: contents;
+  }
+
+  .contact-title { order: 1; }
+  .label-btn { order: 2; justify-self: start; }
+  .contact-info { order: 3; }
+
   .contact {
     --lw: min(76vw, 300px);
     padding: var(--s6) var(--s3) var(--s5);

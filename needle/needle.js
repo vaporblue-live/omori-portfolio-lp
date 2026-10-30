@@ -674,3 +674,25 @@ if (header) {
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 }
+
+// ---------- Contact: the jacket spans the headline-and-mail block ----------
+// On wide screens the jacket is exactly as tall as that block and starts level
+// with the headline, so the two read as one unit. Phones stack them instead.
+const contactGroup = document.querySelector(".contact-group");
+if (contactGroup && labelBtn) {
+  const wide = window.matchMedia("(min-width: 768px)");
+  const fit = () => {
+    if (!wide.matches) {
+      labelBtn.style.removeProperty("--cw");
+      labelBtn.style.marginTop = "";
+      return;
+    }
+    const text = contactGroup.parentElement;
+    labelBtn.style.setProperty("--cw", `${contactGroup.offsetHeight}px`);
+    labelBtn.style.marginTop = `${contactGroup.getBoundingClientRect().top - text.getBoundingClientRect().top}px`;
+  };
+  new ResizeObserver(fit).observe(contactGroup);
+  wide.addEventListener("change", fit);
+  document.fonts?.ready.then(fit);
+  fit();
+}

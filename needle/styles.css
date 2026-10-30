@@ -1137,7 +1137,7 @@ button {
 }
 
 .contact-title {
-  margin: var(--s3) 0 0;
+  margin: 0;
   font-weight: 900;
   font-size: clamp(55px, 6.2vw, 89px);
   line-height: 1.236;
@@ -1163,8 +1163,16 @@ button {
   display: grid;
   grid-template-columns: auto auto;
   justify-content: center;
-  align-items: center;
+  align-items: start;
   gap: var(--s7);
+}
+
+/* headline + mail: the jacket matches this block's height and top edge
+   (set by needle.js) */
+.contact-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s4);
 }
 
 .contact-text {
@@ -1465,7 +1473,8 @@ button {
   .contact-text .tag { order: 0; justify-self: start; }
 
   /* one column: headline, then the jacket (the button), then the mail details */
-  .contact-text {
+  .contact-text,
+  .contact-group {
     display: contents;
   }
 

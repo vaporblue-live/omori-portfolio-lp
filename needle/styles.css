@@ -1137,10 +1137,11 @@ button {
 }
 
 .contact-title {
-  margin: 0;
+  /* tight leading so the letters, not the line box, meet the jacket's top */
+  margin: -0.12em 0 0;
   font-weight: 900;
-  font-size: clamp(55px, 6.2vw, 89px);
-  line-height: 1.236;
+  font-size: clamp(55px, 7.6vw, 121px);
+  line-height: 1.1;
 }
 
 .contact-title span {
@@ -1353,7 +1354,7 @@ button {
 .contact-mail {
   margin: var(--s1) 0 0;
   font-family: var(--latin);
-  font-size: clamp(18px, 1.6vw, 23px);
+  font-size: clamp(21px, 2vw, 30px);
   white-space: nowrap;
   line-height: 1.236;
   overflow-wrap: anywhere;
@@ -1375,8 +1376,8 @@ button {
 }
 
 .contact-note {
-  margin: var(--s3) 0 0;
-  font-size: 13px;
+  margin: var(--s3) 0 -0.4em;
+  font-size: 15px;
   line-height: 1.8;
   color: var(--sub);
 }

@@ -1119,10 +1119,6 @@ button {
   padding: var(--s7) var(--s5) var(--s6);
 }
 
-.contact {
-  text-align: center;
-}
-
 .contact-title {
   margin: var(--s3) 0 0;
   font-weight: 900;
@@ -1135,15 +1131,26 @@ button {
   display: inline-block;
 }
 
-.contact-row {
-  display: block;
-}
-
+/* A diagonal read, like a sleeve: the headline sits top left, the label (the
+   button) holds the centre, and the mail details close the line at bottom right
+   as a liner note with a rule down its side. */
 .contact-body {
   display: grid;
-  justify-items: center;
-  gap: var(--s4);
-  margin-top: var(--s5);
+  grid-template-columns: minmax(0, 1fr) var(--lw) minmax(0, 1fr);
+  align-items: end;
+  gap: var(--s5);
+  margin-top: var(--s4);
+}
+
+.label-btn {
+  grid-column: 2;
+}
+
+.contact-info {
+  grid-column: 3;
+  justify-self: start;
+  padding-left: var(--s3);
+  border-left: 3px solid var(--orange);
 }
 
 .label-btn {
@@ -1233,7 +1240,8 @@ button {
 .contact-mail {
   margin: var(--s1) 0 0;
   font-family: var(--latin);
-  font-size: clamp(21px, 2.6vw, 34px);
+  font-size: clamp(18px, 1.6vw, 23px);
+  white-space: nowrap;
   line-height: 1.236;
   overflow-wrap: anywhere;
 }
@@ -1303,6 +1311,15 @@ button {
 }
 
 @media (max-width: 1100px) {
+  .contact-body {
+    grid-template-columns: minmax(0, 1fr) var(--lw) minmax(0, 0.382fr);
+  }
+
+  .contact-info {
+    grid-column: 2 / 4;
+    justify-self: start;
+  }
+
   .session-body {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--s5);
@@ -1337,8 +1354,16 @@ button {
 
   .contact-body {
     grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    text-align: center;
+    gap: var(--s4);
+  }
+
+  .label-btn,
+  .contact-info {
+    grid-column: 1;
+  }
+
+  .label-btn {
+    justify-self: center;
   }
 
   .site-footer {

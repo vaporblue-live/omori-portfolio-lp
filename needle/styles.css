@@ -314,7 +314,19 @@ button {
   outline-offset: 6px;
 }
 
-.is-playing .record {
+/* the record waits mostly inside the sleeve and slides out when the pointer
+   comes to the deck; once playing it stays out */
+.record {
+  transform: translateX(calc(var(--size) * -0.382));
+}
+
+.deck:hover .record,
+.record:focus-visible {
+  transform: none;
+}
+
+.is-playing .record,
+.is-playing .deck:hover .record {
   transform: translateX(calc(var(--size) * 0.12));
 }
 
@@ -856,7 +868,12 @@ button {
 }
 
 .jacket.is-front .disc {
-  transform: translateZ(-1px) translateY(-34%);
+  transform: translateZ(-1px) translateY(-8%);
+}
+
+.jacket.is-front:hover .disc,
+.jacket.is-front:focus-visible .disc {
+  transform: translateZ(-1px) translateY(-38.2%);
 }
 
 .disc-label {
@@ -1122,54 +1139,73 @@ button {
 .contact-title {
   margin: var(--s3) 0 0;
   font-weight: 900;
-  font-size: clamp(34px, 6.2vw, 89px);
+  font-size: clamp(55px, 6.2vw, 89px);
   line-height: 1.236;
-  white-space: nowrap;
 }
 
 .contact-title span {
   display: inline-block;
 }
 
-/* A diagonal read, like a sleeve: the headline sits top left, the label (the
-   button) holds the centre, and the mail details close the line at bottom right
-   as a liner note with a rule down its side. */
+/* Text on the left (headline, then the mail details as a liner note), the
+   jacket on the right at 1 : 1.618. The record waits in its sleeve and slides
+   out when the pointer comes near; pressing it turns the record once and opens
+   the mail. */
 .contact-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--lw) minmax(0, 1fr);
-  align-items: end;
-  gap: var(--s5);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.618fr);
+  align-items: stretch;
+  gap: var(--s6);
   margin-top: var(--s4);
 }
 
-.label-btn {
-  grid-column: 2;
+.contact-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s5);
+}
+
+.contact-row {
+  display: block;
 }
 
 .contact-info {
-  grid-column: 3;
-  justify-self: start;
   padding-left: var(--s3);
   border-left: 3px solid var(--orange);
 }
 
 .label-btn {
+  --cw: clamp(240px, 26vw, 377px);
+  position: relative;
   display: block;
-  width: var(--lw);
-  aspect-ratio: 1;
-  border-radius: 50%;
+  justify-self: center;
+  width: calc(var(--cw) * 1.382);
+  height: var(--cw);
   text-decoration: none;
   color: var(--navy);
-  background: repeating-radial-gradient(circle, #0b0b10 0 2px, #17171f 2px 3px);
-  box-shadow: 0 0 0 var(--s1) #1a2a55, 0 34px 55px rgba(0, 0, 0, 0.5);
-  transform: scale(calc(1 + var(--beat, 0) * 0.021));
-  transition: box-shadow 0.3s ease;
+  outline: none;
 }
 
-.label-btn:hover,
-.label-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 var(--s1) var(--orange), 0 34px 55px rgba(0, 0, 0, 0.5);
+.label-btn:focus-visible .c-sleeve {
+  box-shadow: 0 0 0 3px var(--yellow), 0 34px 55px rgba(0, 0, 0, 0.5);
+}
+
+.c-disc {
+  position: absolute;
+  top: 3%;
+  left: 3%;
+  z-index: 1;
+  width: calc(var(--cw) * 0.94);
+  aspect-ratio: 1;
+  transform: translateX(8%);
+  transition: transform 0.618s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.label-btn:hover .c-disc,
+.label-btn:focus-visible .c-disc,
+.label-btn.is-turning .c-disc {
+  transform: translateX(38.2%);
 }
 
 .label-disc {
@@ -1177,41 +1213,41 @@ button {
   place-items: center;
   width: 100%;
   height: 100%;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 30deg, transparent 0 40deg, rgba(255, 255, 255, 0.08) 55deg, transparent 70deg 210deg, rgba(255, 255, 255, 0.06) 225deg, transparent 240deg),
+    repeating-radial-gradient(circle, #0b0b10 0 2px, #17171f 2px 3px);
+  box-shadow: 0 21px 34px rgba(0, 0, 0, 0.45);
 }
 
 .label-face {
   position: relative;
   display: grid;
   place-content: center;
-  gap: var(--s1);
-  width: 61.8%;
+  gap: 4px;
+  width: 38.2%;
   aspect-ratio: 1;
   border-radius: 50%;
   text-align: center;
   background: var(--orange);
-  transition: background 0.3s ease;
-}
-
-.label-btn:hover .label-face,
-.label-btn:focus-visible .label-face {
-  background: var(--yellow);
+  transform: scale(calc(1 + var(--beat, 0) * 0.034));
 }
 
 .label-top {
   font-family: var(--mono);
-  font-size: 13px;
-  letter-spacing: 0.13em;
+  font-size: 9px;
+  letter-spacing: 0.08em;
 }
 
 .label-main {
   font-family: var(--latin);
-  font-size: clamp(21px, 2.6vw, 34px);
+  font-size: clamp(16px, 1.6vw, 21px);
   line-height: 1;
 }
 
 .label-sub {
   font-weight: 900;
-  font-size: 13px;
+  font-size: 9px;
 }
 
 .label-hole {
@@ -1228,13 +1264,70 @@ button {
 
 /* one full turn before the mail opens */
 .label-btn.is-turning .label-disc {
-  animation: label-turn 0.618s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: label-turn 0.618s cubic-bezier(0.4, 0, 0.2, 1) 0.236s;
 }
 
 @keyframes label-turn {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* the jacket: blue print with the headline type, like the sleeve at the top */
+.c-sleeve {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  width: var(--cw);
+  height: var(--cw);
+  padding: var(--s3);
+  overflow: hidden;
+  background:
+    radial-gradient(circle, rgba(10, 20, 48, 0.22) 1px, transparent 1.6px) 0 0 / 8px 8px,
+    linear-gradient(160deg, #2f6fe0, #1f58cf);
+  box-shadow: 0 34px 55px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 0.3s ease;
+}
+
+.c-cat {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.13em;
+  color: var(--white);
+}
+
+.c-word {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-family: var(--latin);
+  font-size: calc(var(--cw) * 0.236);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+}
+
+.c-stripes {
+  display: grid;
+  gap: 4px;
+  margin: 0 calc(var(--s3) * -1) var(--s2);
+}
+
+.c-stripes i {
+  display: block;
+  height: 8px;
+  background: var(--orange);
+}
+
+.c-stripes i:nth-child(2) { background: var(--yellow); }
+.c-stripes i:nth-child(3) { background: var(--sky); }
+
+.c-foot {
+  font-weight: 900;
+  font-size: 13px;
+  color: var(--white);
 }
 
 .contact-mail {
@@ -1312,13 +1405,18 @@ button {
 
 @media (max-width: 1100px) {
   .contact-body {
-    grid-template-columns: minmax(0, 1fr) var(--lw) minmax(0, 0.382fr);
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s5);
   }
 
-  .contact-info {
-    grid-column: 2 / 4;
-    justify-self: start;
+  /* one column: headline, then the jacket (the button), then the mail details */
+  .contact-text {
+    display: contents;
   }
+
+  .contact-title { order: 1; }
+  .label-btn { order: 2; justify-self: start; }
+  .contact-info { order: 3; }
 
   .session-body {
     grid-template-columns: minmax(0, 1fr);
@@ -1352,18 +1450,12 @@ button {
     padding: var(--s6) var(--s3) var(--s5);
   }
 
-  .contact-body {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--s4);
-  }
-
-  .label-btn,
-  .contact-info {
-    grid-column: 1;
-  }
-
   .label-btn {
-    justify-self: center;
+    --cw: min(64vw, 260px);
+  }
+
+  .contact-title {
+    font-size: 55px;
   }
 
   .site-footer {
@@ -1612,9 +1704,8 @@ button {
 .single-record {
   --sz: clamp(200px, 22vw, 305px);
   position: relative;
-  display: grid;
-  place-items: center;
-  width: var(--sz);
+  display: block;
+  width: calc(var(--sz) * 1.382);
   height: var(--sz);
   padding: 0;
   border: 0;
@@ -1627,7 +1718,6 @@ button {
 
 .single-record:focus-visible {
   outline: 2px solid var(--yellow);
-  border-radius: 50%;
 }
 
 .single-shadow {
@@ -1639,6 +1729,61 @@ button {
   opacity: 0.55;
   transform: scale(0.9);
   transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.8s;
+}
+
+.single-slide {
+  position: absolute;
+  top: 4%;
+  left: 4%;
+  z-index: 1;
+  width: 92%;
+  width: calc(var(--sz) * 0.92);
+  aspect-ratio: 1;
+  transform: translateX(8%);
+  transition: transform 0.618s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.single-record:hover .single-slide,
+.single-record:focus-visible .single-slide,
+.single-record[aria-pressed="true"] .single-slide {
+  transform: translateX(38.2%);
+}
+
+/* a 7-inch paper sleeve with the die-cut hole */
+.single-sleeve {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  align-content: space-between;
+  width: var(--sz);
+  height: var(--sz);
+  padding: var(--s2);
+  text-align: left;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 17%, #f2ead8 17.4%);
+  box-shadow: 0 21px 34px rgba(0, 0, 0, 0.45);
+}
+
+.single-sleeve-cat {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.13em;
+  color: var(--navy);
+}
+
+.single-sleeve-word {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 6px;
+  font-family: var(--latin);
+  font-size: calc(var(--sz) * 0.09);
+  line-height: 1.1;
+}
+
+.single-sleeve-word .w {
+  color: var(--navy);
 }
 
 .single-disc {
@@ -1695,6 +1840,7 @@ button {
 
 .single-cue {
   position: absolute;
+  left: 0;
   bottom: calc(var(--s3) * -1 - 8px);
   font-family: var(--mono);
   font-size: 13px;
@@ -1703,7 +1849,7 @@ button {
 
 /* lifted and spinning at 45 rpm (60 / 45 = 1.333 s per turn) */
 .single-record[aria-pressed="true"] {
-  transform: translateY(-21px) scale(1.06);
+  transform: translateY(-13px);
 }
 
 .single-record[aria-pressed="true"] .single-disc {
@@ -1733,7 +1879,9 @@ button {
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .label-btn {
+  .c-disc,
+  .label-face {
+    transition: none;
     transform: none;
   }
 
@@ -1747,7 +1895,9 @@ button {
   .disc,
   .jacket-art img,
   .single-record,
-  .single-shadow {
+  .single-shadow,
+  .single-slide,
+  .record {
     transition: none;
   }
 

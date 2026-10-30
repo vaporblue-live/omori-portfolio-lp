@@ -952,7 +952,144 @@ button {
   background: var(--white);
 }
 
+/* ---------- Request: session notes on the back of the sleeve ----------
+   Cream paper like a back cover; it folds down from its top edge as it scrolls in. */
+.session {
+  padding: var(--s7) var(--s5);
+}
+
+/* the tag set in Japanese needs the Japanese face at full weight */
+.tag-jp {
+  font-family: var(--jp);
+  font-weight: 900;
+  font-size: 24px;
+}
+
+.session-title {
+  margin: var(--s3) 0 0;
+  font-family: var(--latin);
+  font-weight: 400;
+  font-size: clamp(34px, 5.6vw, 89px);
+  line-height: 1;
+}
+
+.session-title span {
+  display: inline-block;
+}
+
+.session-body {
+  display: grid;
+  grid-template-columns: 1.618fr 1fr;
+  align-items: start;
+  gap: var(--s6);
+  margin-top: var(--s5);
+  perspective: 1400px;
+}
+
+.paper {
+  padding: var(--s5) var(--s5) var(--s4);
+  color: var(--navy);
+  background:
+    radial-gradient(circle, rgba(10, 20, 48, 0.06) 1px, transparent 1.4px) 0 0 / 8px 8px,
+    #f2ead8;
+  box-shadow: 0 34px 55px rgba(0, 0, 0, 0.45);
+  transform-origin: 50% 0;
+  transform: rotateX(-89deg);
+  opacity: 0;
+  transition: transform 0.89s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.34s ease;
+}
+
+.paper.is-in {
+  transform: none;
+  opacity: 1;
+}
+
+.paper-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s3);
+  padding-bottom: var(--s2);
+  border-bottom: 3px solid var(--navy);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.13em;
+}
+
+.paper-data {
+  margin: 0;
+}
+
+.paper-data div {
+  display: grid;
+  grid-template-columns: 1fr 1.618fr;
+  gap: var(--s3);
+  padding: var(--s3) 0;
+  border-bottom: 1px solid rgba(10, 20, 48, 0.25);
+}
+
+.paper-data dt {
+  font-weight: 900;
+  font-size: 15px;
+}
+
+.paper-en {
+  display: block;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.13em;
+  color: var(--orange);
+}
+
+.paper-data dd {
+  margin: 0;
+  align-self: end;
+  font-weight: 700;
+  font-size: clamp(15px, 1.4vw, 21px);
+  line-height: 1.618;
+}
+
+.paper-foot {
+  margin: var(--s3) 0 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.13em;
+  text-align: right;
+  opacity: 0.618;
+}
+
+.flow {
+  margin: var(--s2) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid rgba(111, 176, 255, 0.35);
+}
+
+.flow li {
+  display: grid;
+  grid-template-columns: var(--s5) 1fr;
+  align-items: baseline;
+  padding: var(--s2) 0;
+  border-bottom: 1px solid rgba(111, 176, 255, 0.18);
+}
+
+.flow-no {
+  font-family: var(--latin);
+  font-size: 21px;
+  color: var(--yellow);
+}
+
+.flow-text {
+  font-weight: 700;
+  font-size: 15px;
+}
+
 @media (max-width: 1100px) {
+  .session-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s5);
+  }
+
   .works-body {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--s5);
@@ -975,6 +1112,19 @@ button {
 
 /* ---------- Phones ---------- */
 @media (max-width: 767px) {
+  .session {
+    padding: var(--s6) var(--s3);
+  }
+
+  .paper {
+    padding: var(--s4) var(--s3) var(--s3);
+  }
+
+  .paper-data div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s1);
+  }
+
   .works {
     --jw: min(72vw, 280px);
     padding: var(--s6) var(--s3);
@@ -1320,6 +1470,12 @@ button {
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
+  .paper {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
+
   .jacket,
   .disc,
   .jacket-art img,

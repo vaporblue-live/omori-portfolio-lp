@@ -578,3 +578,22 @@ if (single) {
     if (playing && ctx) voice("drums", on ? "kick" : "hat", 0);
   });
 }
+
+// ---------- Request: the session notes fold down as they come into view ----------
+const paper = document.querySelector(".paper");
+if (paper) {
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    paper.classList.add("is-in");
+  } else {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          paper.classList.add("is-in");
+          io.disconnect();
+        }
+      },
+      { threshold: 0.236 },
+    );
+    io.observe(paper);
+  }
+}

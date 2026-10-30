@@ -138,26 +138,25 @@
     <section id="works" class="works" aria-labelledby="works-title">
       <p class="tag" aria-hidden="true"><span class="w">W</span><span class="o">O</span><span class="s">R</span><span class="y">K</span><span class="w">S</span></p>
       <h2 class="works-title" id="works-title"><span class="w">PICK</span> <span class="y">A</span> <span class="s">RECORD</span></h2>
-      <p class="catalog">4 RECORDS · ジャケットをめくって、1枚選ぶ</p>
 
       <div class="works-body">
         <div class="crate">
           <div class="bin" tabindex="0" aria-label="作品のレコード棚。左右の矢印キーでめくれます">
-          <button class="jacket" type="button" style="--c: var(--orange)" aria-controls="work-info" aria-label="WORK 01 VLOGを選ぶ">
+          <button class="jacket" type="button" style="--c: var(--orange)" aria-controls="work-info" data-cue="18.5" aria-label="WORK 01 VLOGを選ぶ">
             <span class="disc" aria-hidden="true"><span class="disc-label">01</span></span>
             <span class="jacket-face">
               <span class="jacket-art"><img src="images/work-01.webp" alt="" width="800" height="494" loading="lazy"></span>
               <span class="jacket-type"><span class="jacket-no">WORK 01</span><span class="jacket-title">VLOG</span></span>
             </span>
           </button>
-          <button class="jacket" type="button" style="--c: var(--yellow)" aria-controls="work-info" aria-label="WORK 02 縦型ショートを選ぶ">
+          <button class="jacket" type="button" style="--c: var(--yellow)" aria-controls="work-info" data-cue="34.5" aria-label="WORK 02 縦型ショートを選ぶ">
             <span class="disc" aria-hidden="true"><span class="disc-label">02</span></span>
             <span class="jacket-face">
               <span class="jacket-art"><img src="images/work-02.webp" alt="" width="800" height="494" loading="lazy"></span>
               <span class="jacket-type"><span class="jacket-no">WORK 02</span><span class="jacket-title">縦型ショート</span></span>
             </span>
           </button>
-          <button class="jacket" type="button" style="--c: var(--sky)" aria-controls="work-info" aria-label="WORK 03 ビジネス解説を選ぶ">
+          <button class="jacket" type="button" style="--c: var(--sky)" aria-controls="work-info" data-cue="46.5" aria-label="WORK 03 ビジネス解説を選ぶ">
             <span class="disc" aria-hidden="true"><span class="disc-label">03</span></span>
             <span class="jacket-face">
               <span class="jacket-art"><img src="images/work-03.webp" alt="" width="800" height="494" loading="lazy"></span>
@@ -234,7 +233,8 @@
         <p class="catalog" id="reel-title">FULL REEL · レコードを回すように、早送り・巻き戻し</p>
         <div class="reel-body">
           <div class="reel-screen">
-            <video class="reel-video" src="video/portfolio-web.mp4" preload="metadata" playsinline></video>
+            <video class="reel-video" src="video/portfolio.mp4" preload="metadata" playsinline></video>
+            <p class="reel-cue" aria-live="polite"></p>
           </div>
           <div class="reel-deck">
             <div class="platter" role="slider" tabindex="0" aria-label="動画の再生位置。ドラッグ、または左右の矢印キーで早送り・巻き戻し" aria-valuemin="0" aria-valuemax="79" aria-valuenow="0">
@@ -320,10 +320,7 @@
     </section>
     <section id="contact" class="contact" aria-labelledby="contact-title">
       <p class="tag" aria-hidden="true"><span class="w">C</span><span class="s">O</span><span class="o">N</span><span class="y">T</span><span class="w">A</span><span class="s">C</span><span class="o">T</span></p>
-      <h2 class="contact-title" id="contact-title">
-        <span class="contact-row"><span class="w">ご</span><span class="s">相談</span><span class="o">は</span></span>
-        <span class="contact-row"><span class="w">お</span><span class="s">気</span><span class="o">軽</span><span class="y">に</span></span>
-      </h2>
+      <h2 class="contact-title" id="contact-title"><span class="w">ご</span><span class="s">相談</span><span class="o">は</span><span class="w">お</span><span class="s">気</span><span class="o">軽</span><span class="y">に</span></h2>
 
       <div class="contact-body">
         <a class="label-btn" href="mailto:shintaroomori78@gmail.com?subject=%E5%8B%95%E7%94%BB%E7%B7%A8%E9%9B%86%E3%81%AE%E3%81%94%E7%9B%B8%E8%AB%87" aria-label="メールで相談する（メールの作成画面が開きます）">

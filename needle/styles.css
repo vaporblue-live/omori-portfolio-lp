@@ -79,6 +79,35 @@ button {
   align-items: center;
   gap: var(--s4);
   padding: var(--s3) var(--s5);
+  transition: background 0.382s ease, padding 0.382s ease, backdrop-filter 0.382s ease;
+}
+
+/* Once the page scrolls under it, the header sits on a frosted navy band with
+   the four print colours as a thin register line along the bottom. */
+.site-header::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--orange) 0 23.6%, var(--yellow) 23.6% 38.2%,
+    var(--sky) 38.2% 61.8%, var(--white) 61.8% 76.4%, transparent 76.4%);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.618s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.site-header.is-banded {
+  padding-top: var(--s2);
+  padding-bottom: var(--s2);
+  background: rgba(10, 20, 48, 0.86);
+  -webkit-backdrop-filter: blur(13px) saturate(1.2);
+  backdrop-filter: blur(13px) saturate(1.2);
+  box-shadow: 0 13px 34px rgba(0, 0, 0, 0.34);
+}
+
+.site-header.is-banded::after {
+  transform: scaleX(1);
 }
 
 .logo {
@@ -704,9 +733,9 @@ button {
   display: grid;
   grid-template-columns: auto minmax(0, 440px);
   justify-content: center;
-  align-items: end;
-  gap: var(--s7);
-  margin-top: var(--s5);
+  align-items: center;
+  gap: var(--s6);
+  margin-top: var(--s4);
 }
 
 .crate {
@@ -720,7 +749,8 @@ button {
 .bin {
   position: relative;
   width: var(--jw);
-  height: calc(var(--jw) * 1.618);
+  /* room for the sleeve, the three behind it and the record pulled out */
+  height: calc(var(--jw) * 1.382);
   perspective: 1400px;
   perspective-origin: 50% -34%;
   outline: none;
@@ -826,7 +856,7 @@ button {
 }
 
 .jacket.is-front .disc {
-  transform: translateZ(-1px) translateY(-50%);
+  transform: translateZ(-1px) translateY(-34%);
 }
 
 .disc-label {
@@ -881,7 +911,6 @@ button {
 
 .work-info {
   max-width: 440px;
-  padding-bottom: var(--s6);
 }
 
 .work-no {
@@ -1090,11 +1119,20 @@ button {
   padding: var(--s7) var(--s5) var(--s6);
 }
 
+.contact {
+  text-align: center;
+}
+
 .contact-title {
   margin: var(--s3) 0 0;
   font-weight: 900;
-  font-size: clamp(55px, 7.6vw, 144px);
-  line-height: 1.1;
+  font-size: clamp(34px, 6.2vw, 89px);
+  line-height: 1.236;
+  white-space: nowrap;
+}
+
+.contact-title span {
+  display: inline-block;
 }
 
 .contact-row {
@@ -1103,9 +1141,8 @@ button {
 
 .contact-body {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: var(--s6);
+  justify-items: center;
+  gap: var(--s4);
   margin-top: var(--s5);
 }
 
@@ -1727,5 +1764,58 @@ button {
 
   :root {
     --beat: 0 !important;
+  }
+}
+
+/* ---------- Works → reel: what the crate has cued ---------- */
+.reel-screen {
+  position: relative;
+}
+
+.reel-cue {
+  position: absolute;
+  top: var(--s2);
+  left: var(--s2);
+  margin: 0;
+  padding: var(--s1) var(--s2);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.13em;
+  color: var(--navy);
+  background: var(--yellow);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.reel-cue.is-shown {
+  animation: cue-in 2.618s ease forwards;
+}
+
+@keyframes cue-in {
+  0% { opacity: 0; transform: translateY(-8px); }
+  13% { opacity: 1; transform: none; }
+  76% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* the platter whips round once when a new record is cued */
+.platter.is-cueing {
+  animation: cue-whip 0.618s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes cue-whip {
+  from { transform: rotate(-360deg); }
+  to { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .site-header::after {
+    transition: none;
+  }
+
+  .reel-cue.is-shown {
+    animation: none;
+    opacity: 1;
   }
 }

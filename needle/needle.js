@@ -331,7 +331,9 @@ players.forEach((card) => {
   const canvas = card.querySelector(".wave");
   const g = canvas.getContext("2d");
   const color = getComputedStyle(card).borderTopColor;
-  let start = 0;
+  let hover = false; // the wave keeps moving for as long as the pointer stays
+  let level = 0; // 0 at rest, eases to 1 while hovered
+  let running = false;
   let lastPlay = 0;
 
   function draw(now) {
@@ -342,42 +344,55 @@ players.forEach((card) => {
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
     }
+    level += ((hover ? 1 : 0) - level) * 0.1;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.clearRect(0, 0, w, h);
-    const t = (now - start) / 1000;
-    const env = start ? Math.max(0, 1 - t / 1.2) : 0;
+    const t = now / 1000;
     g.strokeStyle = color;
     g.lineWidth = 2;
-    g.globalAlpha = 0.35 + env * 0.65;
+    g.globalAlpha = 0.35 + level * 0.65;
     g.beginPath();
     for (let x = 0; x <= w; x += 2) {
-      const y = h / 2 - SHAPE[type](x / w, t) * (h / 2 - 3) * env;
+      const y = h / 2 - SHAPE[type](x / w, t) * (h / 2 - 3) * level;
       if (x === 0) g.moveTo(x, y);
       else g.lineTo(x, y);
     }
     g.stroke();
-    if (env > 0) requestAnimationFrame(draw);
-    else card.classList.remove("is-sounding");
+    if (hover || level > 0.01) {
+      requestAnimationFrame(draw);
+    } else {
+      running = false;
+      card.classList.remove("is-sounding");
+    }
   }
 
-  function play() {
-    const now = performance.now();
-    if (now - lastPlay < 600) return; // one phrase at a time
-    lastPlay = now;
+  function enter() {
+    hover = true;
     card.classList.add("is-sounding");
-    if (playing && ctx) PHRASE[type].forEach(([name, at]) => voice(type, name, at));
+    const now = performance.now();
+    if (now - lastPlay > 600 && playing && ctx) {
+      lastPlay = now;
+      PHRASE[type].forEach(([name, at]) => voice(type, name, at));
+    }
     if (reduceMotion) {
-      start = 0;
-      requestAnimationFrame(draw);
+      level = 0;
       return;
     }
-    const running = start && now - start < 1200;
-    start = now;
-    if (!running) requestAnimationFrame(draw);
+    if (!running) {
+      running = true;
+      requestAnimationFrame(draw);
+    }
   }
 
-  card.addEventListener("pointerenter", play);
-  card.addEventListener("focus", play);
+  function leave() {
+    hover = false;
+    if (reduceMotion) card.classList.remove("is-sounding");
+  }
+
+  card.addEventListener("pointerenter", enter);
+  card.addEventListener("pointerleave", leave);
+  card.addEventListener("focus", enter);
+  card.addEventListener("blur", leave);
   requestAnimationFrame(draw); // flat line at rest
 });
 
@@ -410,6 +425,7 @@ if (jackets.length) {
     crateNow.textContent = String(front + 1).padStart(2, "0");
     prevBtn.disabled = front === 0;
     nextBtn.disabled = front === jackets.length - 1;
+    if (moved) document.dispatchEvent(new CustomEvent("work:pick", { detail: { index: front, cue: jackets[front].dataset.cue } }));
     if (withSound && moved && playing && ctx) {
       voice("drums", "hat", 0);
       voice("drums", "kick", 0.2);
@@ -561,6 +577,29 @@ if (reelVideo) {
     lenEl.textContent = clock(length());
     platter.setAttribute("aria-valuemax", String(Math.round(length())));
   });
+  // Picking a record in the crate cues the reel to that work's chapter: the
+  // platter whips round to the new spot and the screen shows what is cued.
+  const cueTag = document.querySelector(".reel-cue");
+  document.addEventListener("work:pick", (e) => {
+    const { cue } = e.detail;
+    const label = jackets[e.detail.index].querySelector(".jacket-no").textContent;
+    if (cue === undefined) {
+      cueTag.textContent = `${label} · チャンネルで再生`;
+    } else {
+      start();
+      reelVideo.currentTime = Number(cue);
+      render();
+      cueTag.textContent = `CUED · ${label}`;
+      if (!reduceMotion) {
+        platter.classList.remove("is-cueing");
+        void platter.offsetWidth; // restart the whip
+        platter.classList.add("is-cueing");
+      }
+    }
+    cueTag.classList.remove("is-shown");
+    void cueTag.offsetWidth;
+    cueTag.classList.add("is-shown");
+  });
   render();
 }
 
@@ -626,4 +665,12 @@ if (labelBtn) {
     }
     setTimeout(() => (copyBtn.textContent = "アドレスをコピー"), 2618);
   });
+}
+
+// ---------- Header: a band appears once the page scrolls under it ----------
+const header = document.querySelector(".site-header");
+if (header) {
+  const onScroll = () => header.classList.toggle("is-banded", window.scrollY > 34);
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
 }

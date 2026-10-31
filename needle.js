@@ -466,45 +466,77 @@ if (jackets.length) {
 }
 
 // ---------- Works: the full reel ----------
-// The platter is tied to the video's clock: one turn is REV seconds of picture.
-// Dragging it scratches the film forward and back; the play button runs it
-// normally and the platter turns with it. Playing the reel pauses the music.
+// The platter is tied to the clock of whatever the reel is playing: one turn
+// is REV seconds. Dragging it scratches forward and back; the play button runs
+// it normally and the platter turns with it. Playing the reel pauses the music.
+// The reel plays the portfolio video, or, when Fuu is picked in the crate, a
+// full Fuu song from YouTube; the platter's length follows the song.
 const reelVideo = document.querySelector(".reel-video");
 if (reelVideo) {
   const REV = 13;
   const platter = document.querySelector(".platter");
   const disc = platter.querySelector(".platter-disc");
+  const platterLabel = platter.querySelector(".platter-label");
   const playBtn = document.querySelector(".reel-play");
   const nowEl = document.querySelector(".reel-now");
   const lenEl = document.querySelector(".reel-len");
+  const ytBox = document.querySelector(".reel-yt");
+  const hint = document.querySelector(".reel-hint");
   const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  const labelHtml = platterLabel.innerHTML;
+  const hintText = hint.textContent;
   let dragging = false;
   let lastAngle = 0;
   let wanted = null; // scrub target, applied once per frame
+  let wasPlaying = false;
+
+  // Two sources behind one interface.
+  const film = {
+    now: () => reelVideo.currentTime,
+    length: () => (Number.isFinite(reelVideo.duration) ? reelVideo.duration : 79),
+    seek: (t) => (reelVideo.currentTime = t),
+    play: () => reelVideo.play().catch(console.error),
+    pause: () => reelVideo.pause(),
+    paused: () => reelVideo.paused,
+    ended: () => reelVideo.ended,
+  };
+  let yt = null; // YT.Player once the API is ready
+  let ytLength = 244;
+  const song = {
+    now: () => (yt && yt.getCurrentTime ? yt.getCurrentTime() : 0),
+    length: () => (yt && yt.getDuration && yt.getDuration() > 0 ? yt.getDuration() : ytLength),
+    seek: (t) => yt && yt.seekTo(t, true),
+    play: () => yt && yt.playVideo(),
+    pause: () => yt && yt.pauseVideo(),
+    paused: () => !yt || !yt.getPlayerState || yt.getPlayerState() !== 1,
+    ended: () => !!yt && yt.getPlayerState && yt.getPlayerState() === 0,
+  };
+  let media = film;
 
   const start = () => reelVideo.classList.add("is-started");
-  const length = () => (Number.isFinite(reelVideo.duration) ? reelVideo.duration : 79);
 
   function render() {
-    const t = reelVideo.currentTime;
+    const t = wanted ?? media.now();
     if (!reduceMotion) disc.style.setProperty("--angle", `${(t / REV) * 360}deg`);
     nowEl.textContent = clock(t);
+    lenEl.textContent = clock(media.length());
     platter.setAttribute("aria-valuenow", String(Math.round(t)));
+    platter.setAttribute("aria-valuemax", String(Math.round(media.length())));
   }
 
   function frame() {
     if (wanted !== null) {
-      reelVideo.currentTime = wanted;
-      wanted = null;
+      media.seek(wanted);
+      if (!dragging) wanted = null;
     }
     render();
-    if (dragging || !reelVideo.paused) requestAnimationFrame(frame);
+    if (dragging || !media.paused()) requestAnimationFrame(frame);
   }
 
   function setPlayUi() {
-    const on = !reelVideo.paused;
+    const on = !media.paused();
     playBtn.textContent = on ? "❚❚" : "▶";
-    playBtn.setAttribute("aria-label", on ? "動画を止める" : "動画を再生");
+    playBtn.setAttribute("aria-label", on ? "停止" : "再生");
   }
 
   const pointerAngle = (e) => {
@@ -516,9 +548,9 @@ if (reelVideo) {
     start();
     dragging = true;
     lastAngle = pointerAngle(e);
-    wanted = reelVideo.currentTime;
-    reelVideo.dataset.wasPlaying = String(!reelVideo.paused);
-    reelVideo.pause();
+    wanted = media.now();
+    wasPlaying = !media.paused();
+    media.pause();
     platter.classList.add("is-dragging");
     requestAnimationFrame(frame);
     try {
@@ -535,15 +567,17 @@ if (reelVideo) {
     if (d > 180) d -= 360;
     if (d < -180) d += 360;
     lastAngle = a;
-    const base = wanted ?? reelVideo.currentTime;
-    wanted = Math.max(0, Math.min(length(), base + (d / 360) * REV));
+    wanted = Math.max(0, Math.min(media.length(), (wanted ?? media.now()) + (d / 360) * REV));
   });
 
   function release() {
     if (!dragging) return;
     dragging = false;
     platter.classList.remove("is-dragging");
-    if (reelVideo.dataset.wasPlaying === "true") reelVideo.play();
+    if (wanted !== null) media.seek(wanted);
+    wanted = null;
+    render();
+    if (wasPlaying) media.play();
   }
   platter.addEventListener("pointerup", release);
   platter.addEventListener("pointercancel", release);
@@ -552,18 +586,18 @@ if (reelVideo) {
     const step = e.key === "ArrowRight" || e.key === "ArrowUp" ? 2 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -2 : 0;
     if (!step) return;
     start();
-    reelVideo.currentTime = Math.max(0, Math.min(length(), reelVideo.currentTime + step));
+    media.seek(Math.max(0, Math.min(media.length(), media.now() + step)));
     render();
     e.preventDefault();
   });
 
   playBtn.addEventListener("click", async () => {
-    if (reelVideo.paused) {
+    if (media.paused()) {
       if (playing) await toggle(); // pause the music first
-      if (reelVideo.ended) reelVideo.currentTime = 0;
-      reelVideo.play().catch(console.error);
+      if (media.ended()) media.seek(0);
+      media.play();
     } else {
-      reelVideo.pause();
+      media.pause();
     }
   });
   reelVideo.addEventListener("play", () => {
@@ -573,28 +607,93 @@ if (reelVideo) {
   });
   reelVideo.addEventListener("pause", setPlayUi);
   reelVideo.addEventListener("ended", setPlayUi);
-  reelVideo.addEventListener("loadedmetadata", () => {
-    lenEl.textContent = clock(length());
-    platter.setAttribute("aria-valuemax", String(Math.round(length())));
-  });
-  // Picking a record in the crate cues the reel to that work's chapter: the
-  // platter whips round to the new spot and the screen shows what is cued.
+  reelVideo.addEventListener("loadedmetadata", render);
+
+  // YouTube player, loaded only when Fuu is first picked.
+  let ytReady = null;
+  function loadYouTube(id) {
+    if (ytReady) return ytReady;
+    ytReady = new Promise((resolve) => {
+      window.onYouTubeIframeAPIReady = () => {
+        yt = new YT.Player("reel-yt-player", {
+          videoId: id,
+          playerVars: { playsinline: 1, rel: 0, modestbranding: 1 },
+          events: {
+            onReady: () => {
+              render();
+              resolve();
+            },
+            onStateChange: async (ev) => {
+              setPlayUi();
+              if (ev.data === 1) {
+                if (playing) await toggle();
+                requestAnimationFrame(frame);
+              }
+            },
+            onError: () => {
+              cueTag.textContent = "この曲はYouTubeで再生してください";
+              cueTag.classList.remove("is-shown");
+              void cueTag.offsetWidth;
+              cueTag.classList.add("is-shown");
+            },
+          },
+        });
+      };
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(tag);
+    });
+    return ytReady;
+  }
+
+  function useFilm() {
+    if (media === film) return;
+    song.pause();
+    media = film;
+    ytBox.hidden = true;
+    reelVideo.hidden = false;
+    platterLabel.innerHTML = labelHtml;
+    hint.textContent = hintText;
+    setPlayUi();
+    render();
+  }
+
+  function useSong(id, title, len) {
+    film.pause();
+    media = song;
+    ytLength = len;
+    reelVideo.hidden = true;
+    ytBox.hidden = false;
+    platterLabel.innerHTML = `Fuu<br><i>${title.split(" / ")[0]}</i>`;
+    hint.textContent = "円盤をなぞると、曲がレコードのように進み・戻ります。";
+    loadYouTube(id).then(() => {
+      if (yt.getVideoData && yt.getVideoData().video_id !== id) yt.cueVideoById(id);
+      render();
+    });
+    setPlayUi();
+    render();
+  }
+
+  // Picking a record in the crate cues the reel: the platter whips round to the
+  // new spot and the screen shows what is cued.
   const cueTag = document.querySelector(".reel-cue");
   document.addEventListener("work:pick", (e) => {
-    const { cue } = e.detail;
-    const label = jackets[e.detail.index].querySelector(".jacket-no").textContent;
-    if (cue === undefined) {
-      cueTag.textContent = `${label} · チャンネルで再生`;
+    const jacket = jackets[e.detail.index];
+    const label = jacket.querySelector(".jacket-no").textContent;
+    if (jacket.dataset.yt) {
+      useSong(jacket.dataset.yt, jacket.dataset.title, 244);
+      cueTag.textContent = `CUED · ${jacket.dataset.title}`;
     } else {
+      useFilm();
       start();
-      reelVideo.currentTime = Number(cue);
+      film.seek(Number(e.detail.cue));
       render();
       cueTag.textContent = `CUED · ${label}`;
-      if (!reduceMotion) {
-        platter.classList.remove("is-cueing");
-        void platter.offsetWidth; // restart the whip
-        platter.classList.add("is-cueing");
-      }
+    }
+    if (!reduceMotion) {
+      platter.classList.remove("is-cueing");
+      void platter.offsetWidth; // restart the whip
+      platter.classList.add("is-cueing");
     }
     cueTag.classList.remove("is-shown");
     void cueTag.offsetWidth;

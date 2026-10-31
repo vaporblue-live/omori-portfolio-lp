@@ -2085,3 +2085,21 @@ button {
     opacity: 1;
   }
 }
+
+/* the YouTube song fills the same 16:9 screen as the film */
+.reel-yt {
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.reel-yt iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.reel-video[hidden],
+.reel-yt[hidden] {
+  display: none;
+}
